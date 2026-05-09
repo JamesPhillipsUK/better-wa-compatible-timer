@@ -85,6 +85,8 @@ def openDisplayInBrowser() -> bool:
     displayURL = getDisplayURL(f"src{os.sep}LEDSetup.json")
     messageURL = getMessageControllerURL(f"src{os.sep}LEDSetup.json")
     display = webbrowser.open_new(displayURL)
+    if Flags.displayOnly:
+        return display
     message = webbrowser.open_new(messageURL)
     waTiming = webbrowser.open_new("http://127.0.0.1:5000")
     if display and message and waTiming:
@@ -134,12 +136,12 @@ if __name__ == "__main__":
     """ Handles arguments, runs setup if needed, runs timer.
     """
     for item in sys.argv:
-        match item:
-            case "-e":
+        if item.startswith("-"):
+            if 'e' in item:
                 Flags.everything = True
-            case "-f":
+            if 'f' in item:
                 Flags.firstTime = True
-            case "-d":
+            if 'd' in item:
                 Flags.displayOnly = True
     if Flags.everything and Flags.displayOnly:
         Flags.displayOnly = False
