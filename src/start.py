@@ -6,6 +6,7 @@ Version 0.0.1
 from dataclasses import dataclass
 import setup
 import timer
+import time
 import sys
 
 
@@ -27,6 +28,14 @@ def runSetup() -> None:
         raise FailedSetupException("Failed to set up LED Display.")
 
 
+def startDisplay() -> None:
+    pass
+
+
+def startEverything() -> None:
+    pass
+
+
 if __name__ == "__main__":
     """ Handles arguments, runs setup if needed, runs timer.
     """
@@ -44,3 +53,7 @@ if __name__ == "__main__":
         sys.exit(1)
     if Flags.firstTime:
         runSetup()
+    if Flags.everything:
+        startEverything()
+    elif Flags.displayOnly:
+        startDisplay()
