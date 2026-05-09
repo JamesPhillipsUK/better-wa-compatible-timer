@@ -4,7 +4,6 @@ Author: Jesse Phillips <jesse@jessephillips.uk>
 Version 0.0.1
 """
 
-import subprocess
 import json
 import os
 import http.server
@@ -14,19 +13,31 @@ from http import HTTPStatus
 
 
 def getSetup(setupFile: str) -> dict:
+    """ Gets the setup data from LEDSetup.json.
+    Args:
+        setupFile (str): the filepath to the setup file.
+    Returns:
+        dict: the setup data.
+    """
     with open(setupFile, 'r', encoding="UTF-8") as fp:
         setup = json.load(fp)
     return setup
 
 
-class Handler(http.server.SimpleHTTPRequestHandler):
+class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self,
                  request: bytes,
                  client_address: Tuple[str, int],
                  server: socketserver.BaseServer):
         super().__init__(request, client_address, server)
 
-    def apiResponse(self, file: str) -> bytes:
+    def generateResponse(self, file: str) -> bytes:
+        """ Generates an HTTP response.
+        Args:
+            file (str): the file the user is asking for.
+        Returns:
+            bytes: the file data, encoded as a stream of bytes.
+        """
         if file.endswith(".json"):
             with open(file, 'r', encoding="UTF-8") as fp:
                 jSON = json.load(fp)
@@ -36,17 +47,48 @@ class Handler(http.server.SimpleHTTPRequestHandler):
              file.endswith(".css"):
             with open(file, 'r', encoding="UTF-8") as fp:
                 return fp.read().encode()
+        return None
+            
+    def generateAPIResponseHeaders(self) -> None:
+        """ Generates headers for responding to API requests.
+            Sets them using self.send_header - no need to return anything.
+        """
+        pass
+      
+    def generateAPIResponse(self) -> bytes:
+        """ Generates an API response.
+        """
+        pass
 
-    def do_GET(self):
+    def do_POST(self):
+        """ Handles all POST requests.
+            Some sections of Philip's API implementation POST, others
+            prefer to GET.  Thanks, Philip - I hate this.
+        """
         if self.path.startswith("/api"):
             self.send_response(HTTPStatus.OK)
-
+            self.generateAPIResponseHeaders()
             self.end_headers()
+            self.wfile.write(bytes(self.generateAPIResponse()))
+        else:
+            return
+
+    def do_GET(self):
+        """ Handles all GET requests.
+        """
+        if self.path.startswith("/api"):
+            self.send_response(HTTPStatus.OK)
+            self.generateAPIResponseHeaders()
+            self.end_headers()
+            self.wfile.write(bytes(self.generateAPIResponse()))
         elif self.path.startswith('/'):
             requestedFile = f"src{os.sep}http{self.path.replace('/', os.sep)}"
             if not os.path.exists(requestedFile):
                 self.send_response(404)
+                self.send_header("Content-Type",
+                                 "text/plain; charset=utf-8")
                 self.end_headers()
+                self.wfile.write(bytes("404: File Not Found.".encode()))
                 return
             self.send_response(HTTPStatus.OK)
             if self.path.endswith(".json"):
@@ -63,16 +105,23 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                                  "text/css; charset=utf-8")
             else:
                 self.send_response(500)
+                self.send_header("Content-Type",
+                                 "text/plain; charset=utf-8")
                 self.end_headers()
+                self.wfile.write(bytes("500: Internal Server Error.".encode()))
                 return
             self.end_headers()
-            self.wfile.write(bytes(self.apiResponse(requestedFile)))
+            self.wfile.write(bytes(self.generateResponse(requestedFile)))
+        else:
+            return
 
 
 def runServer() -> None:
+    """ Runs the internal server for the LED Displays and messaging API.
+    """
     setup = getSetup(f"src{os.sep}LEDSetup.json")
     server = socketserver.TCPServer((setup["hostname"], setup["port"]),
-                                    Handler)
+                                    HTTPServerHandler)
     server.serve_forever()
 
 #def runServer() -> None:
