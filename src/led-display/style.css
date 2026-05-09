@@ -1,0 +1,196 @@
+/** Stylesheet for led-display.html.
+ *  @author: Philips Taylor
+ *  @editor: Jesse Phillips
+ *  @version: 0.0.9
+ **/
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  color: white;
+  background: #000000;
+}
+
+.screen {
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 0.5vh 2vw 0.25vh 2vw;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  justify-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.top-label {
+  display: none;
+  position: absolute;
+  top: 18vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: min(12vw, 12vh);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.timer-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.timer {
+  font-size: min(40vw, 78vh);
+  line-height: 0.82;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-align: center;
+  transform: translateX(-0.018em);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.timer.detail-display {
+  font-size: min(44vw, 54vh);
+  line-height: 1;
+  letter-spacing: 0;
+  transform: translateY(4vh);
+}
+
+.timer.message-display {
+  max-width: 92vw;
+  white-space: normal;
+  line-height: 0.95;
+  letter-spacing: 0;
+  transform: none;
+  font-variant-numeric: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.timer.fast-display {
+  font-size: min(52vw, 62vh);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  transform: none;
+  font-variant-numeric: normal;
+  white-space: nowrap;
+}
+
+.bottom-group {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0;
+  margin-top: -1vh;
+}
+
+.bottom-label {
+  font-size: 12vw;
+  font-weight: 700;
+  line-height: 0.9;
+  min-height: 0;
+  opacity: 0.98;
+}
+
+.secondary {
+  display: none;
+  font-size: 4vw;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.8;
+  margin-top: 0.4vh;
+}
+
+.flag,
+.offline-message {
+  color: #ffffff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: min(12vw, 24vh);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-align: center;
+  line-height: 1;
+}
+
+.flag {
+  display: none;
+  white-space: nowrap;
+}
+
+.red {
+  color: #ffffff;
+}
+
+.yellow {
+  color: #000000;
+}
+
+.green {
+  color: #ffffff;
+}
+
+.black {
+  color: #ffffff;
+}
+
+body.bg-red {
+  background: #ff0000;
+}
+
+body.bg-yellow {
+  background: #eaea00;
+}
+
+body.bg-green {
+  background: #00a431;
+}
+
+body.bg-black {
+  background: #000000;
+}
+
+body.mode-flag .top-label,
+body.mode-flag .timer-wrap,
+body.mode-flag .bottom-group {
+  display: none;
+}
+
+body.mode-flag .screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.mode-flag .flag {
+  display: block;
+}
+
+.offline-message {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+body.disconnected .offline-message {
+  display: flex;
+}
