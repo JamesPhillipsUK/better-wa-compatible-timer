@@ -59,13 +59,37 @@ def getDisplayURL(setupFile: str) -> str:
     return url
 
 
+def getMessageControllerURL(setupFile: str) -> str:
+    """ Gets the message controller URL based on the settings in LEDSetup.json.
+    Args:
+        setupFile (str): the filepath to LEDSetup.json
+    Returns:
+        str: the URL for the message controller.
+    """
+    with open(setupFile, 'r', encoding="UTF-8") as fp:
+        lEDSetup = json.load(fp)
+    if lEDSetup["ssl"]:
+        url = "https://"
+    else:
+        url = "http://"
+    url += lEDSetup["hostname"]
+    url += f":{lEDSetup["port"]}/message-controller/messages.html"
+    return url
+
+
 def openDisplayInBrowser() -> bool:
     """ Opens a browser window containing the LED Display.
     Returns:
         bool: true if the window could be opened.
     """
-    url = getDisplayURL(f"src{os.sep}LEDSetup.json")
-    return webbrowser.open_new(url)
+    displayURL = getDisplayURL(f"src{os.sep}LEDSetup.json")
+    messageURL = getMessageControllerURL(f"src{os.sep}LEDSetup.json")
+    display = webbrowser.open_new(displayURL)
+    message = webbrowser.open_new(messageURL)
+    waTiming = webbrowser.open_new("http://127.0.0.1:5000")
+    if display and message and waTiming:
+        return True
+    return False
 
 
 def startDisplay() -> None:
