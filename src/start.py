@@ -79,25 +79,13 @@ def startDisplay() -> None:
     timerThread.join()
 
 
-def getPlatform() -> str:
-    """ Gets the current platform
-    Returns:
-        str: the platform kernel
-    Throws:
-        FailedSetupException if the platform is not supported.
-    """
-    pfm = platform.system()
-    if pfm == "Darwin" or pfm == "Linux" or pfm == "Windows":
-        return pfm
-    else:
-        raise FailedSetupException(f"Platform not supported. {pfm}")
-
-
 def startWATimingSystem() -> None:
     """ Starts the WA timing system.
     """
-    pfm = getPlatform()
-    print(pfm)
+    try:
+        pfm = setup.getPlatform()
+    except setup.UnsupportedPlatformException as e:
+        raise FailedSetupException(str(e))
     if pfm == "Linux":
         subprocess.run([f"src{os.sep}world_archery_timing_system-linux-x64"])
     elif pfm == "Windows":
