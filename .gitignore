@@ -1,5 +1,7 @@
 # Custom config
 src/world_archery_timing_system-linux-x64
+config/
+log/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
