@@ -5,6 +5,7 @@ Version 0.0.1
 """
 from dataclasses import dataclass
 import webbrowser
+import threading
 import setup
 import timer
 import time
@@ -60,7 +61,11 @@ def openDisplayInBrowser() -> bool:
 
 
 def startDisplay() -> None:
-    pass
+    timerThread = threading.Thread(target=timer.runServer, args=[])
+    timerThread.start()
+    time.sleep(1)
+    openDisplayInBrowser()
+    timerThread.join()
 
 
 def startEverything() -> None:
@@ -69,8 +74,6 @@ def startEverything() -> None:
 
     # Start display
     startDisplay()
-    time.sleep(1)
-    openDisplayInBrowser()
 
 
 if __name__ == "__main__":
