@@ -1,7 +1,54 @@
 # Better WA-Compatible Timer
-A better "WA Timer System"-compatible clock for Archery
 
-This system acts as an intermediary between World Archery's [World Archery timing system](https://web.archive.org/web/20260508224434/https://www.worldarchery.sport/sport/education/judging) and a screen.
+A better "World Archery Timing System"-compatible timer display for Archery.
+
+This system acts as an improved timer for World Archery's [World Archery Timing System](https://web.archive.org/web/20260508224434/https://www.worldarchery.sport/sport/education/judging).
+
+## System Requirements
+
+- Windows 10 / 11, MacOS (on Apple Silicon), or Linux
+- Multi-core CPU (4+ core, 2+GHz recommended)
+- 1GB+ Storage
+- 4GB+ RAM
+
+## Setup
+
+- Download the file, either by downloading the zip archive from GitHub, or:
+  - ``git clone https://github.com/JamesPhillipsUK/better-wa-compatible-timer''
+- Download a copy of the [World Archery timing system](https://web.archive.org/web/20260508224434/https://www.worldarchery.sport/sport/education/judging)
+- Place the timing system executable file in the `src` folder.
+
+## Running
+
+- Navigate to the folder you've downloaded.
+- If using Windows, from PowerShell, run `py src/start.py -fe` for the first run.
+  - run `py src/start.py -e` for subsequent runs.
+- If using MacOS / Linux, from the terminal, run `python3 src/start.py -e`.
+
+## Notes
+
+- The LED display page is served on localhost:5500/led-display/led-display.html.
+- The message control centre is localhost:5500/message-controller/messages.html.
+- The WA Timing system feed is expected to run on localhost:5001.
+- The WA Timing system control centre is expected to run on localhost:5000.
+
+### Messages
+
+- The message control centre is localhost:5500/message-controller/messages.html.
+- Messages can be accessed remotely over the network by replacing 'localhost' with the machine IP.
+- You can type a message or choose from a list of presets.
+- Add to queue: when you add a message,it should appear in the queue.
+- At the END of all details, the message should move to "active" and appear on the display.
+- When the next next end is loaded, the message will be dropped from active and the system returns to normal state.
+- If there is no message in the queue, default display is "next detail".
+
+### Issues
+
+Please report any bugs or quirks to [neualtournaments@gmail.com](mailto:neualtournaments@gmail.com), or register them in the Issues tab on GitHub.
+
+### Disclaimer
+
+This project is not affiliated with World Archery, or any other international or national governing body for archery.  It is written and released freely under the terms in the LICENSE file.
 
 ## License
 
