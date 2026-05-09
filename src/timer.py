@@ -24,4 +24,4 @@ def runServer() -> None:
                     "--bind",
                     f"{setup["hostname"]}",
                     "--directory",
-                    f"src{os.sep}led-display{os.sep}"])
+                    f"src{os.sep}http{os.sep}"])

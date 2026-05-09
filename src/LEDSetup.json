@@ -2,5 +2,5 @@
     "ssl": false,
     "hostname": "127.0.0.1",
     "port": 5500,
-    "page": "led-display.html"
+    "page": "led-display/led-display.html"
 }

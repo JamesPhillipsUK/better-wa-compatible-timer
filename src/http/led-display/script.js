@@ -1,5 +1,5 @@
 /** JavaScript for led-display.html.
- *  @author: Philips Taylor
+ *  @author: Philip Taylor
  *  @editor: Jesse Phillips
  *  @version: 0.0.9
  **/

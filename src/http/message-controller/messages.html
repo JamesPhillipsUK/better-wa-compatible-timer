@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!--
+messages.html
+Message controller for the LED screen.
+
+Author: Philip Taylor
+Author: Jesse Phillips
+Version: 0.0.1
+-->
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>WA Message Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css" , type="text/css" />
+</head>
+
+<body>
+  <main class="wrap">
+    <h1 class="title">LED Display Message</h1>
+    <p class="subtitle">
+      Queue a one-time message to appear at the end of the last detail.
+      <br> It will replace the normal “next detail” display until the next end is loaded.
+    </p>
+    <section class="card">
+      <label class="label" for="messageInput">Message</label>
+      <div class="input-wrap">
+        <input id="messageInput" class="message-input" type="text" maxlength="40"
+          placeholder="Example: RESTART AT 10:25" autocomplete="off" />
+        <div class="meta-row">
+          <div>Maximum length: 40 characters</div>
+          <div id="charCount" class="char-count">0 / 40</div>
+        </div>
+      </div>
+      <div class="preset-row">
+        <button class="preset" type="button" data-message="RESTART AT ">RESTART AT</button>
+        <button class="preset" type="button" data-message="DRINK WATER">DRINK WATER</button>
+        <button class="preset" type="button" data-message="REAPPLY SUNCREAM">REAPPLY SUNCREAM</button>
+      </div>
+      <div class="button-row">
+        <button id="queueBtn" class="btn-primary" type="button">Queue Message</button>
+        <button id="clearPendingBtn" class="btn-neutral" type="button">Clear Queued</button>
+        <button id="clearActiveBtn" class="btn-danger" type="button">Clear Active</button>
+      </div>
+      <div id="status" class="status">Ready.</div>
+    </section>
+    <section class="card">
+      <div class="state-grid">
+        <div class="state-box">
+          <div class="state-title">Queued for Next End Break</div>
+          <div id="pendingValue" class="state-value state-empty">None</div>
+        </div>
+        <div class="state-box">
+          <div class="state-title">Currently Showing on Display</div>
+          <div id="activeValue" class="state-value state-empty">None</div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="./script.js"></script>
+</body>
+
+</html>
