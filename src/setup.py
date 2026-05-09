@@ -28,6 +28,10 @@ def getPlatform() -> str:
 
 
 def run() -> bool:
+    """ Runs the setup tools if needed.
+    Returns:
+        bool: true if successful.
+    """
     try:
         pfm = getPlatform()
     except UnsupportedPlatformException:

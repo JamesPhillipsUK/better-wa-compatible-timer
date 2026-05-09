@@ -79,6 +79,9 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.state.clearActive()
 
     def handleInternalServerError(self) -> None:
+        """ Handles server-side errors.
+            Any error encountered here is assumed to be a 500 error.
+        """
         self.send_response(500)
         self.send_header("Content-Type", "text/plain; charset=utf-8")
         self.end_headers()
