@@ -10,6 +10,7 @@ import http.server
 import socketserver
 from typing import Tuple
 from http import HTTPStatus
+from stateManager import StateFile
 
 
 def getSetup(setupFile: str) -> dict:
@@ -25,6 +26,7 @@ def getSetup(setupFile: str) -> dict:
 
 
 class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
+    state = StateFile()
     def __init__(self,
                  request: bytes,
                  client_address: Tuple[str, int],
@@ -49,38 +51,85 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
                 return fp.read().encode()
         return None
             
-    def generateAPIResponseHeaders(self) -> None:
+    def generateAPIResponseHeaders(self, name: str) -> None:
         """ Generates headers for responding to API requests.
             Sets them using self.send_header - no need to return anything.
         """
-        pass
+        match name:
+            case "/message-state" | "/pending" | "/clear-pending" | "consume" \
+                 | "/clear-active":
+                self.send_header("Content-Type",
+                                 "application/json; charset=utf-8")
       
-    def generateAPIResponse(self) -> bytes:
+    def generateAPIResponse(self, name: str, data: str = None) -> bytes:
         """ Generates an API response.
         """
-        pass
+        match name:
+            case "/message-state":
+                return self.state.readState()
+            case "/pending":
+                return self.state.handlePending(data)
+            case "/clear-pending":
+                return self.state.clearPending()
+            case "/consume":
+                return self.state.consume()
+            case "/clear-active":
+                return self.state.clearActive()
+
+    def handleInternalServerError(self) -> None:
+        self.send_response(500)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(bytes("500: Internal Server Error.".encode()))
 
     def do_POST(self):
         """ Handles all POST requests.
             Some sections of Philip's API implementation POST, others
             prefer to GET.  Thanks, Philip - I hate this.
         """
-        if self.path.startswith("/api"):
-            self.send_response(HTTPStatus.OK)
-            self.generateAPIResponseHeaders()
-            self.end_headers()
-            self.wfile.write(bytes(self.generateAPIResponse()))
+        if self.path.startswith("/api/message-state/"):
+            if self.path.endswith("/pending"):
+                self.send_response(HTTPStatus.OK)
+                self.generateAPIResponseHeaders("/pending")
+                self.end_headers()
+                data = self.rfile.read(int(self.headers['Content-Length']))
+                self.wfile.write(bytes(self.generateAPIResponse("/pending",
+                                                                data),
+                                       encoding='utf8'))
+            elif self.path.endswith("/clear-pending"):
+                self.send_response(HTTPStatus.OK)
+                self.generateAPIResponseHeaders("/clear-pending")
+                self.end_headers()
+                self.wfile.write(
+                    bytes(self.generateAPIResponse("/clear-pending"),
+                          encoding='utf8'))
+            elif self.path.endswith("/consume"):
+                self.send_response(HTTPStatus.OK)
+                self.generateAPIResponseHeaders("/consume")
+                self.end_headers()
+                self.wfile.write(bytes(self.generateAPIResponse("/consume"),
+                                       encoding='utf8'))
+            elif self.path.endswith("/clear-active"):
+                self.send_response(HTTPStatus.OK)
+                self.generateAPIResponseHeaders("/clear-active")
+                self.end_headers()
+                self.wfile.write(
+                    bytes(self.generateAPIResponse("/clear-active"),
+                          encoding='utf8'))
+            else:
+                self.handleInternalServerError()
         else:
-            return
+            self.handleInternalServerError()
 
     def do_GET(self):
         """ Handles all GET requests.
         """
-        if self.path.startswith("/api"):
+        if self.path == "/api/message-state":
             self.send_response(HTTPStatus.OK)
-            self.generateAPIResponseHeaders()
+            self.generateAPIResponseHeaders("/message-state")
             self.end_headers()
-            self.wfile.write(bytes(self.generateAPIResponse()))
+            self.wfile.write(bytes(self.generateAPIResponse("/message-state"),
+                                   encoding='utf8'))
         elif self.path.startswith('/'):
             requestedFile = f"src{os.sep}http{self.path.replace('/', os.sep)}"
             if not os.path.exists(requestedFile):
@@ -104,15 +153,12 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header("Content-Type",
                                  "text/css; charset=utf-8")
             else:
-                self.send_response(500)
-                self.send_header("Content-Type",
-                                 "text/plain; charset=utf-8")
-                self.end_headers()
-                self.wfile.write(bytes("500: Internal Server Error.".encode()))
+                self.handleInternalServerError()
                 return
             self.end_headers()
             self.wfile.write(bytes(self.generateResponse(requestedFile)))
         else:
+            self.handleInternalServerError()
             return
 
 
