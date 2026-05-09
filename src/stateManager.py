@@ -17,7 +17,7 @@ class StateFile:
 
     def getDefaultState(self) -> str:
         return "{\"pending\": \"\",\"active\": \"\"}\n"
-    
+
     def normalise(self, message: str) -> str:
         message = message.strip()
         if len(message) > 40:
@@ -34,7 +34,7 @@ class StateFile:
         if state is None or state.strip() is None:
             state = self.getDefaultState()
         return state
-    
+
     def writeState(self, stateDict: dict) -> None:
         """ Writes a state to the state file.
         Args:
@@ -42,7 +42,7 @@ class StateFile:
         """
         with open(self.path, 'w', encoding="UTF-8") as fp:
             json.dump(stateDict, fp)
-    
+
     def handlePending(self, request: bytes) -> str:
         """ Handles requests to /pending
         Args:
@@ -57,7 +57,7 @@ class StateFile:
         print(stateDict["pending"])
         self.writeState(stateDict)
         return self.readState()
-    
+
     def clearAttribute(self, attr: str) -> str:
         """ Clears a named attribute from the state.
         Args:
@@ -77,7 +77,7 @@ class StateFile:
             str: the updated state.
         """
         return self.clearAttribute("pending")
-    
+
     def clearActive(self) -> str:
         """ Handles requests to /clear-active
         Returns:

@@ -27,6 +27,7 @@ def getSetup(setupFile: str) -> dict:
 
 class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
     state = StateFile()
+
     def __init__(self,
                  request: bytes,
                  client_address: Tuple[str, int],
@@ -44,13 +45,13 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
             with open(file, 'r', encoding="UTF-8") as fp:
                 jSON = json.load(fp)
             return json.dumps(jSON).encode()
-        elif file.endswith(".js") or \
-             file.endswith(".html") or \
-             file.endswith(".css"):
+        elif (file.endswith(".js") or
+              file.endswith(".html") or
+              file.endswith(".css")):
             with open(file, 'r', encoding="UTF-8") as fp:
                 return fp.read().encode()
         return None
-            
+
     def generateAPIResponseHeaders(self, name: str) -> None:
         """ Generates headers for responding to API requests.
             Sets them using self.send_header - no need to return anything.
@@ -61,7 +62,7 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.send_header("Content-Type",
                                  "application/json; charset=utf-8")
-      
+
     def generateAPIResponse(self, name: str, data: str = None) -> bytes:
         """ Generates an API response.
         """

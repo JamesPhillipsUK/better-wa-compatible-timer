@@ -36,9 +36,9 @@ def run() -> bool:
         batchFile = os.path.abspath(f"src{os.sep}setup-led-display.bat")
         from ctypes import windll
         windll.shell32.ShellExecuteW(None,
-                                    "runas",
-                                    "cmd.exe",
-                                    " ".join(["/c", batchFile]),
-                                    None,
-                                    1)
+                                     "runas",
+                                     "cmd.exe",
+                                     " ".join(["/c", batchFile]),
+                                     None,
+                                     1)
     return True
