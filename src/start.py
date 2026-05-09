@@ -4,10 +4,13 @@ Author: Jesse Phillips <jesse@jessephillips.uk>
 Version 0.0.1
 """
 from dataclasses import dataclass
+import webbrowser
 import setup
 import timer
 import time
+import json
 import sys
+import os
 
 
 @dataclass
@@ -28,12 +31,46 @@ def runSetup() -> None:
         raise FailedSetupException("Failed to set up LED Display.")
 
 
+def getDisplayURL(setupFile: str) -> str:
+    """ Gets the LED display URL based on the settings in LEDSetup.json.
+    Args:
+        setupFile (str): the filepath to LEDSetup.json
+    Returns:
+        str: the URL for the LED display.
+    """
+    with open(setupFile, 'r', encoding="UTF-8") as fp:
+        lEDSetup = json.load(fp)
+    if lEDSetup["ssl"]:
+        url = "https://"
+    else:
+        url = "http://"
+    url += lEDSetup["hostname"]
+    url += f":{lEDSetup["port"]}/"
+    url += lEDSetup["page"]
+    return url
+
+
+def openDisplayInBrowser() -> bool:
+    """ Opens a browser window containing the LED Display.
+    Returns:
+        bool: true if the window could be opened.
+    """
+    url = getDisplayURL(f"src{os.sep}LEDSetup.json")
+    return webbrowser.open_new(url)
+
+
 def startDisplay() -> None:
     pass
 
 
 def startEverything() -> None:
-    pass
+    """"""
+    # Start WA timing system
+
+    # Start display
+    startDisplay()
+    time.sleep(1)
+    openDisplayInBrowser()
 
 
 if __name__ == "__main__":
