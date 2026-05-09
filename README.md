@@ -42,6 +42,10 @@ This system acts as an improved timer for World Archery's [World Archery Timing 
 - When the next next end is loaded, the message will be dropped from active and the system returns to normal state.
 - If there is no message in the queue, default display is "next detail".
 
+### Security
+
+This system is inherently "trusting".  All API endpoints are open across the network in order to allow you to make use of multiple networked machines displaying timers and sending messages as needed across a large and/or complex field of play.  You should be running your timing system on its own, entirely sandboxed, network.  You should not expose your timing system to the whole Internet.  You should not give access to your timing system network to anyone you do not trust.  You are responsible for your own network safety.
+
 ### Issues
 
 Please report any bugs or quirks to [neualtournaments@gmail.com](mailto:neualtournaments@gmail.com), or register them in the Issues tab on GitHub.
