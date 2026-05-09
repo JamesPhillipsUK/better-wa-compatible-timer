@@ -58,6 +58,7 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
         match name:
             case "/message-state" | "/pending" | "/clear-pending" | "consume" \
                  | "/clear-active":
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.send_header("Content-Type",
                                  "application/json; charset=utf-8")
       
@@ -169,14 +170,3 @@ def runServer() -> None:
     server = socketserver.TCPServer((setup["hostname"], setup["port"]),
                                     HTTPServerHandler)
     server.serve_forever()
-
-#def runServer() -> None:
-#    setup = getSetup(f"src{os.sep}LEDSetup.json")
-#    subprocess.run(["python3",
-#                    "-m",
-#                    "http.server",
-#                    f"{setup["port"]}",
-#                    "--bind",
-#                    f"{setup["hostname"]}",
-#                    "--directory",
-#                    f"src{os.sep}http{os.sep}"])
