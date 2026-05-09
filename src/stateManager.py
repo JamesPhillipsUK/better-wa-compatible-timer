@@ -16,15 +16,28 @@ class StateFile:
         pass
 
     def getDefaultState(self) -> str:
+        """ Gets the default state the message-state.json file should have.
+        """
         return "{\"pending\": \"\",\"active\": \"\"}\n"
 
     def normalise(self, message: str) -> str:
+        """ Normalises a string to be: unpadded / max. 40 chars for display.
+        Args:
+            message (str): the message to be normalised.
+        Returns:
+            str: the normalised string.
+        """
         message = message.strip()
         if len(message) > 40:
             message = message[:40]
         return message
 
     def readState(self) -> str:
+        """ Reads the state of the message-state.json file.
+            Defaults to the default state if the file is blank,
+        Returns:
+            str: the state of the file.
+        """
         with open(self.path, 'r', encoding="UTF-8") as fp:
             stateJSON = json.load(fp)
             stateAttrs = ["pending", "active"]
