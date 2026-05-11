@@ -60,7 +60,6 @@ class Window(QMainWindow):
         button = self.sender()
         if button.isChecked():
             self.currentFlag = button.value
-        print(self.currentFlag)
 
     def onClickedGo(self):
         """ Runs the system when the go button is pressed.
