@@ -115,8 +115,7 @@ def startWATimingSystem() -> None:
     if pfm == "Linux":
         subprocess.run([f"src{os.sep}world_archery_timing_system-linux-x64"])
     elif pfm == "Windows":
-        subprocess.run(["start",
-                        f"src{os.sep}world_archery_timing_system-win-x64.exe"])
+        subprocess.run([f"src{os.sep}world_archery_timing_system-win-x64.exe"])
     else:
         subprocess.run([f"src{os.sep}world_archery_timing_system-macos-arm64"])
 
