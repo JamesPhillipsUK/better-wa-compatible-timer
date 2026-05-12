@@ -11,15 +11,15 @@ import setup
 import threading
 import subprocess
 from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import(QApplication,
-                            QMainWindow,
-                            QVBoxLayout,
-                            QHBoxLayout,
-                            QRadioButton,
-                            QPushButton,
-                            QWidget,
-                            QMessageBox,
-                            QFileDialog)
+from PyQt5.QtWidgets import (QApplication,
+                             QMainWindow,
+                             QVBoxLayout,
+                             QHBoxLayout,
+                             QRadioButton,
+                             QPushButton,
+                             QWidget,
+                             QMessageBox,
+                             QFileDialog)
 
 
 class Window(QMainWindow):
@@ -30,17 +30,17 @@ class Window(QMainWindow):
     currentFlag: str = ""
     executable: str = ""
     processReturn: int = 99
-    initialised:bool = False
+    initialised: bool = False
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Better Timer Wizard") 
+        self.setWindowTitle("Better Timer Wizard")
 
-    def setupUI(self):
+    def setupUI(self) -> None:
         """ Builds the GUI for the system.
         """
         mainLayout = QVBoxLayout()
-        menuLayout = QHBoxLayout()  
+        menuLayout = QHBoxLayout()
         button = QRadioButton("Initialise")
         button.value = "-f"
         button.toggled.connect(self.onClickedRadio)
@@ -68,20 +68,20 @@ class Window(QMainWindow):
         self.timer.timeout.connect(self.handleProcessReturn)
         self.timer.start()
 
-    def onClickedRadio(self):
+    def onClickedRadio(self) -> None:
         """ Sets the flag requested by the user when a radio button is pressed.
         """
         button = self.sender()
         if button.isChecked():
             self.currentFlag = button.value
 
-    def onClickedFile(self):
+    def onClickedFile(self) -> None:
         """ Selects the location of the WA Executable file.
         """
         name = QFileDialog.getOpenFileName(None, 'Open file')
         print(name[0])
 
-    def onClickedGo(self):
+    def onClickedGo(self) -> None:
         """ Runs the system when the go button is pressed.
         """
         if self.currentFlag == "":
@@ -104,16 +104,27 @@ class Window(QMainWindow):
             processList.append(self.executable)
         self.runThreadedSubprocess(processList)
 
-    def runThreadedSubprocess(self, commandList: list) -> Any:
-        t = threading.Thread(target = self.runSubprocess,
-                             args = ([commandList]))
+    def runThreadedSubprocess(self, commandList: list) -> None:
+        """ Creates a thread to run a subprocess on a non-GUI-thread.
+        Args:
+            commandList (list): the list of commands to pass to subprocess.run.
+        """
+        t = threading.Thread(target=self.runSubprocess,
+                             args=([commandList]))
         t.start()
 
-    def runSubprocess(self, commandList):
+    def runSubprocess(self, commandList) -> None:
+        """ Creates a subprocess (run this on a non-GUI-thread).
+        Args:
+            commandList (list): the list of commands to pass to subprocess.run.
+        """
         p = subprocess.run(commandList)
         self.processReturn = p.returncode
 
-    def handleProcessReturn(self):
+    def handleProcessReturn(self) -> None:
+        """ Handles what to do when a subprocess thread has returned.
+            Because we can't create QMessageBox-es in the thread, do them here.
+        """
         if self.currentFlag == "-f":
             if self.processReturn == 99:
                 pass
@@ -133,6 +144,8 @@ class Window(QMainWindow):
 
 
 def display() -> None:
+    """ Displays the app.
+    """
     app = QApplication(sys.argv)
     window = Window()
     window.setupUI()

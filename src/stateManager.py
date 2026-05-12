@@ -1,4 +1,5 @@
 """ stateManager.py
+    Manages the state of messages passed by our API.
 
 Author: Jesse Phillips <jesse@jessephillips.uk>
 Version 0.0.1

@@ -1,4 +1,5 @@
 """ timer.py
+    Handles the server that operates the timer and API calls.
 
 Author: Jesse Phillips <jesse@jessephillips.uk>
 Version 0.0.1
@@ -87,7 +88,7 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(bytes("500: Internal Server Error.".encode()))
 
-    def do_POST(self):
+    def do_POST(self) -> None:
         """ Handles all POST requests.
             Some sections of Philip's API implementation POST, others
             prefer to GET.  Thanks, Philip - I hate this.
@@ -126,7 +127,7 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
         else:
             self.handleInternalServerError()
 
-    def do_GET(self):
+    def do_GET(self) -> None:
         """ Handles all GET requests.
         """
         if self.path == "/api/message-state":

@@ -1,4 +1,6 @@
 """ start.py
+    Starts and manages the timer system.  Can be called directly,
+    or by wizard.py.
 
 Author: Jesse Phillips <jesse@jessephillips.uk>
 Version 0.0.1

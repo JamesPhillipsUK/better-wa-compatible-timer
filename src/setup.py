@@ -1,4 +1,5 @@
 """ setup.py
+    Handles system setup and first-run initialisation.  Called by start.py.
 
 Author: Jesse Phillips <jesse@jessephillips.uk>
 Version 0.0.1
