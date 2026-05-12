@@ -17,24 +17,32 @@ This system acts as an improved timer for World Archery's [World Archery Timing 
 - Download the file, either by downloading the zip archive from GitHub, or:
   - ``git clone https://github.com/JamesPhillipsUK/better-wa-compatible-timer''
 - Download a copy of the [World Archery timing system](https://web.archive.org/web/20260508224434/https://www.worldarchery.sport/sport/education/judging)
-- Place the timing system executable file in the `src` folder.
+- (Optional) Place the timing system executable file in the `src` folder.
+  - If you place the executable file elsewhere, you can use the `-x [filepath]` flag when running the src/start.py manually, or, select the file using the Wizard.
 
 ## Running
 
-### Manual (recommended)
+### Automatic (recommended)
+
+- If using Windows, run `windows-run-me.ps1` using PowerShell.
+  - If running the file does nothing, run `
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser` first.
+- Otherwise, run `linux-mac-run-me.sh` using the terminal.
+- This should open the Wizard, where you can select your options and run the system.
+
+### Manual (alternative)
 
 - Navigate to the folder you've downloaded.
 - If using Windows, from PowerShell, run `py src/start.py -fe` for the first run.
   - run `py src/start.py -e` for subsequent runs.
 - If using MacOS / Linux, from the terminal, run `python3 src/start.py -e`.
 
-### Automatic (experimental)
+#### Flags for running the system in manual mode
 
-- If using Windows, run `windows-run-me.ps1` using PowerShell.
- - If running the file does nothing, run `
-Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser` first.
-- Otherwise, run `linux-mac-run-me.sh` using the terminal.
-- This should open the Wizard, where you can select your options and run the system.
+- `-f`: initialise the system for the first run.
+- `-e`: run everything in the system (excluding initialisation).
+- `-d`: run just the display ONLY
+- `-x [filepath]`: search for the World Archery Timing System executable at a specific filepath.
 
 ## Notes
 
