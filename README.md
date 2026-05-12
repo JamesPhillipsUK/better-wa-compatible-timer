@@ -31,6 +31,8 @@ This system acts as an improved timer for World Archery's [World Archery Timing 
 ### Automatic (experimental)
 
 - If using Windows, run `windows-run-me.ps1` using PowerShell.
+ - If running the file does nothing, run `
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser` first.
 - Otherwise, run `linux-mac-run-me.sh` using the terminal.
 - This should open the Wizard, where you can select your options and run the system.
 
