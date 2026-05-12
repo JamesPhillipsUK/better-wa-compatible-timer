@@ -7,6 +7,7 @@ This system acts as an improved timer for World Archery's [World Archery Timing 
 ## System Requirements
 
 - Windows 10 / 11, MacOS (on Apple Silicon), or Linux
+- Python 3.10+ (3.14+ recommended)
 - Multi-core CPU (4+ core, 2+GHz recommended)
 - 1GB+ Storage
 - 4GB+ RAM
@@ -20,10 +21,18 @@ This system acts as an improved timer for World Archery's [World Archery Timing 
 
 ## Running
 
+### Manual (recommended)
+
 - Navigate to the folder you've downloaded.
 - If using Windows, from PowerShell, run `py src/start.py -fe` for the first run.
   - run `py src/start.py -e` for subsequent runs.
 - If using MacOS / Linux, from the terminal, run `python3 src/start.py -e`.
+
+### Automatic (experimental)
+
+- If using Windows, run `windows-run-me.ps1` using PowerShell.
+- Otherwise, run `linux-mac-run-me.sh` using the terminal.
+- This should open the Wizard, where you can select your options and run the system.
 
 ## Notes
 
