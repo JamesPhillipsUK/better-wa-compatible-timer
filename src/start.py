@@ -150,6 +150,8 @@ if __name__ == "__main__":
                 Flags.executableElsewhere = True
     if Flags.executableElsewhere:
         Flags.executable = sys.argv[-1]
+        if not os.path.isfile(Flags.executable):
+            raise FailedSetupException("Executable file not found.")
     if Flags.everything and Flags.displayOnly:
         Flags.displayOnly = False
     if not Flags.everything and not Flags.displayOnly and not Flags.firstTime:
