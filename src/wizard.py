@@ -8,7 +8,9 @@ Version 0.0.1
 import os
 import sys
 import setup
+import threading
 import subprocess
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import(QApplication,
                             QMainWindow,
                             QVBoxLayout,
@@ -27,6 +29,9 @@ class Window(QMainWindow):
     """
     currentFlag: str = ""
     executable: str = ""
+    processReturn: int = 99
+    initialised:bool = False
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Better Timer Wizard") 
@@ -58,6 +63,10 @@ class Window(QMainWindow):
         widget = QWidget()
         widget.setLayout(mainLayout)
         self.setCentralWidget(widget)
+        self.timer = QTimer()
+        self.timer.setInterval(100)
+        self.timer.timeout.connect(self.handleProcessReturn)
+        self.timer.start()
 
     def onClickedRadio(self):
         """ Sets the flag requested by the user when a radio button is pressed.
@@ -77,6 +86,12 @@ class Window(QMainWindow):
         """
         if self.currentFlag == "":
             pass
+        if self.currentFlag == "-f" and self.initialised:
+            dialogue = QMessageBox(None)
+            dialogue.setWindowTitle("Notification")
+            dialogue.setText("Already initialised!")
+            dialogue.exec()
+            return
         pfm = setup.getPlatform()
         pyCommand = "python3"
         if pfm == "Windows":
@@ -87,16 +102,34 @@ class Window(QMainWindow):
         if self.executable != "":
             processList.append("-x")
             processList.append(self.executable)
-        p = subprocess.run(processList)
-        if self.currentFlag == "-f":
-            dialogue = QMessageBox(self)
-            dialogue.setWindowTitle("Notification")
-            if p.returncode == 0:
-                dialogue.setText("Initialisation complete!")
-            else:
-                dialogue.setText("Initialisation failed!")
-            dialogue.exec()
+        self.runThreadedSubprocess(processList)
 
+    def runThreadedSubprocess(self, commandList: list) -> Any:
+        t = threading.Thread(target = self.runSubprocess,
+                             args = ([commandList]))
+        t.start()
+
+    def runSubprocess(self, commandList):
+        p = subprocess.run(commandList)
+        self.processReturn = p.returncode
+
+    def handleProcessReturn(self):
+        if self.currentFlag == "-f":
+            if self.processReturn == 99:
+                pass
+            elif self.processReturn == 0:
+                self.timer.stop()
+                dialogue = QMessageBox(None)
+                dialogue.setWindowTitle("Notification")
+                dialogue.setText("Initialisation complete!")
+                dialogue.exec()
+                self.initialised = True
+            else:
+                self.processReturn = 99
+                dialogue = QMessageBox(None)
+                dialogue.setWindowTitle("Notification")
+                dialogue.setText("Initialisation failed!")
+                dialogue.exec()
 
 
 def display() -> None:
