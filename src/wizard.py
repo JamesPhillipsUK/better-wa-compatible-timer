@@ -16,7 +16,8 @@ from PyQt5.QtWidgets import(QApplication,
                             QRadioButton,
                             QPushButton,
                             QWidget,
-                            QMessageBox)
+                            QMessageBox,
+                            QFileDialog)
 
 
 class Window(QMainWindow):
@@ -24,7 +25,8 @@ class Window(QMainWindow):
     Extends:
         QMainWindow
     """
-    currentFlag = ""
+    currentFlag: str = ""
+    executable: str = ""
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Better Timer Wizard") 
@@ -47,6 +49,9 @@ class Window(QMainWindow):
         button.toggled.connect(self.onClickedRadio)
         menuLayout.addWidget(button)
         mainLayout.addLayout(menuLayout)
+        fileButton = QPushButton("Find WA Timing System Install (optional).")
+        fileButton.pressed.connect(self.onClickedFile)
+        mainLayout.addWidget(fileButton)
         goButton = QPushButton("Run!")
         goButton.pressed.connect(self.onClickedGo)
         mainLayout.addWidget(goButton)
@@ -61,6 +66,12 @@ class Window(QMainWindow):
         if button.isChecked():
             self.currentFlag = button.value
 
+    def onClickedFile(self):
+        """ Selects the location of the WA Executable file.
+        """
+        name = QFileDialog.getOpenFileName(None, 'Open file')
+        print(name[0])
+
     def onClickedGo(self):
         """ Runs the system when the go button is pressed.
         """
@@ -70,9 +81,13 @@ class Window(QMainWindow):
         pyCommand = "python3"
         if pfm == "Windows":
             pyCommand = "py"
-        p = subprocess.run([pyCommand,
-                        f"src{os.sep}start.py",
-                        self.currentFlag])
+        processList = [pyCommand,
+                       f"src{os.sep}start.py",
+                       self.currentFlag]
+        if self.executable != "":
+            processList.append("-x")
+            processList.append(self.executable)
+        p = subprocess.run(processList)
         if self.currentFlag == "-f":
             dialogue = QMessageBox(self)
             dialogue.setWindowTitle("Notification")
