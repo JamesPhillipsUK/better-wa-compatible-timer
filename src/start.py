@@ -23,6 +23,8 @@ class Flags:
     everything: bool = False
     displayOnly: bool = False
     firstTime: bool = False
+    executableElsewhere: bool = False
+    executable: str = ""
 
 
 class FailedSetupException(Exception):
@@ -112,7 +114,9 @@ def startWATimingSystem() -> None:
         pfm = setup.getPlatform()
     except setup.UnsupportedPlatformException as e:
         raise FailedSetupException(str(e))
-    if pfm == "Linux":
+    if Flags.executableElsewhere:
+        subprocess.run([Flags.executable])
+    elif pfm == "Linux":
         subprocess.run([f"src{os.sep}world_archery_timing_system-linux-x64"])
     elif pfm == "Windows":
         subprocess.run([f"src{os.sep}world_archery_timing_system-win-x64.exe"])
@@ -142,6 +146,10 @@ if __name__ == "__main__":
                 Flags.firstTime = True
             if 'd' in item:
                 Flags.displayOnly = True
+            if 'x' in item:
+                Flags.executableElsewhere = True
+    if Flags.executableElsewhere:
+        Flags.executable = sys.argv[-1]
     if Flags.everything and Flags.displayOnly:
         Flags.displayOnly = False
     if not Flags.everything and not Flags.displayOnly and not Flags.firstTime:
