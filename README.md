@@ -4,6 +4,12 @@ A better "World Archery Timing System"-compatible timer display for Archery.
 
 This system acts as an improved timer for World Archery's [World Archery Timing System](https://web.archive.org/web/20260508224434/https://www.worldarchery.sport/sport/education/judging).
 
+## Features
+
+- Simplified timer display, designed to be easy to read on LED Displays.
+- Message control panel to conveniently send messages via the timer displays between shooting ends.
+- Easy-to-use Wizard - to setup and run the entire timing and messaging system in just a few clicks.
+
 ## System Requirements
 
 - Windows 10 / 11, MacOS (on Apple Silicon), or Linux
@@ -46,7 +52,7 @@ Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser` first.
 
 ## Notes
 
-- The LED display page is served on localhost:5500/led-display/led-display.html.
+- The LED display page is served on localhost:5500/led-display/led-display.html. (This can be changed manually by changing settings in LEDSetup.json)
 - The message control centre is localhost:5500/message-controller/messages.html.
 - The WA Timing system feed is expected to run on localhost:5001.
 - The WA Timing system control centre is expected to run on localhost:5000.
@@ -69,7 +75,16 @@ This system is inherently "trusting".  All API endpoints are open across the net
 
 Please report any bugs or quirks to [neualtournaments@gmail.com](mailto:neualtournaments@gmail.com), or register them in the Issues tab on GitHub.
 
-### Disclaimer
+## Tested Systems
+
+| OS            | Version       | Python Version | WA Timing System Used                   | Working? |
+| :------------ | :------------ | :------------- | :-------------------------------------- | :------: |
+| Windows       | 11 Pro        | 3.14           | world_archery_timing_system-win-x64.exe | ✅       |
+| Windows       | 10 Education  | 3.14.5         | world_archery_timing_system-win-x64.exe | ✅       |
+| Ubuntu        | 24.04.4 LTS   | 3.12.3         | world_archery_timing_system-linux-x64   | ✅       |
+| Ubuntu Server | 26.04 LTS     | 3.14.4         | world_archery_timing_system-linux-x64   | ✅       |
+
+## Disclaimer
 
 This project is not affiliated with World Archery, or any other international or national governing body for archery.  It is written and released freely under the terms in the LICENSE file.
 
