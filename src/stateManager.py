@@ -2,7 +2,7 @@
     Manages the state of messages passed by our API.
 
 Author: Jesse Phillips <jesse@jessephillips.uk>
-Version 0.0.1
+Version 1.0.0
 """
 import json
 import os

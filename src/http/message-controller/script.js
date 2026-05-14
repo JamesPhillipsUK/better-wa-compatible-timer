@@ -1,7 +1,7 @@
 /** JavaScript for messages.html.
  *  @author: Philip Taylor
  *  @editor: Jesse Phillips
- *  @version: 0.0.1
+ *  @version: 1.0.0
  **/
 
 const inputEl = document.getElementById("messageInput");

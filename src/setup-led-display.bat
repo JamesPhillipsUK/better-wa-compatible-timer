@@ -3,7 +3,7 @@
 REM Windows-specific first-run setup for timer system
 REM @author Philip Taylor
 REM @editor Jesse Phillips
-REM @version 0.0.1
+REM @version 1.0.0
 
 echo ==========================================
 echo   LED Display first-run setup

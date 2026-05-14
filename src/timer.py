@@ -2,7 +2,7 @@
     Handles the server that operates the timer and API calls.
 
 Author: Jesse Phillips <jesse@jessephillips.uk>
-Version 0.0.1
+Version 1.0.0
 """
 
 import json

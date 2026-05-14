@@ -1,7 +1,7 @@
 /** JavaScript for led-display.html.
  *  @author: Philip Taylor
  *  @editor: Jesse Phillips
- *  @version: 0.0.9
+ *  @version: 1.0.0
  **/
 const timerEl = document.getElementById("timer");
 const topLabelEl = document.getElementById("topLabel");

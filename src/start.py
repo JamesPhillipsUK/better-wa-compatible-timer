@@ -3,7 +3,7 @@
     or by wizard.py.
 
 Author: Jesse Phillips <jesse@jessephillips.uk>
-Version 0.0.1
+Version 1.0.0
 """
 from dataclasses import dataclass
 import subprocess

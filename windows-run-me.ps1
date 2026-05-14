@@ -1,7 +1,7 @@
 #!/bin/bash
 ## WINDOWS ONLY - automatically build and run the app.
 ## @author Jesse Phillips
-## @version 0.0.1
+## @version 1.0.0
 py -m venv .env
 .env\Scripts\activate.ps1
 pip3 install -r requirements.txt
