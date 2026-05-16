@@ -91,11 +91,14 @@ class Window(QMainWindow):
         dirDialogue.setWindowTitle('Select a Folder')
         dirDialogue.setFileMode(QFileDialog.Directory)
         dirDialogue.setOption(QFileDialog.ShowDirsOnly, True)
-
         if dirDialogue.exec_() == QFileDialog.Accepted:
             folder = dirDialogue.selectedFiles()[0]
             import imageGallery
             imageGallery.run(folder)
+        dialogue = QMessageBox(None)
+        dialogue.setWindowTitle("Notification")
+        dialogue.setText("Please reload the photo gallery browser window once the timing system is operational.")
+        dialogue.exec()
 
     def onClickedGo(self) -> None:
         """ Runs the system when the go button is pressed.

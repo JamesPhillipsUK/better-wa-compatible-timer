@@ -9,6 +9,7 @@ This system acts as an improved timer for World Archery's [World Archery Timing 
 - Simplified timer display, designed to be easy to read on LED Displays.
 - Message control panel to conveniently send messages via the timer displays between shooting ends.
 - Easy-to-use Wizard - to setup and run the entire timing and messaging system in just a few clicks.
+- Photo gallery which can be used on LED Displays during breaks.
 
 ## System Requirements
 
