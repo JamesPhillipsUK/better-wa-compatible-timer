@@ -1,0 +1,21 @@
+/** Stylesheet for photo-gallery.html.
+ *  @author: Jesse Phillips
+ *  @version: 1.1.0
+ **/
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+#gallery {
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+}
+
+#gallery-img{
+  width:100%;
+  height:auto;
+}

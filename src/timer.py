@@ -59,7 +59,7 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
         """
         match name:
             case "/message-state" | "/pending" | "/clear-pending" | "consume" \
-                 | "/clear-active":
+                 | "/clear-active" | "/get-image-list":
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.send_header("Content-Type",
                                  "application/json; charset=utf-8")
@@ -78,6 +78,8 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.state.consume()
             case "/clear-active":
                 return self.state.clearActive()
+            case "/get-image-list":
+                return self.state.getImageList()
 
     def handleInternalServerError(self) -> None:
         """ Handles server-side errors.
@@ -135,6 +137,12 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
             self.generateAPIResponseHeaders("/message-state")
             self.end_headers()
             self.wfile.write(bytes(self.generateAPIResponse("/message-state"),
+                                   encoding='utf8'))
+        elif self.path == "/api/get-image-list":
+            self.send_response(HTTPStatus.OK)
+            self.generateAPIResponseHeaders("/get-image-list")
+            self.end_headers()
+            self.wfile.write(bytes(self.generateAPIResponse("/get-image-list"),
                                    encoding='utf8'))
         elif self.path.startswith('/'):
             requestedFile = f"src{os.sep}http{self.path.replace('/', os.sep)}"
