@@ -1,15 +1,16 @@
 # Better WA-Compatible Timer
 
 A better "World Archery Timing System"-compatible timer display for Archery.
+Version 1.1.0
 
 This system acts as an improved timer for World Archery's [World Archery Timing System](https://web.archive.org/web/20260508224434/https://www.worldarchery.sport/sport/education/judging).
 
 ## Features
 
-- Simplified timer display, designed to be easy to read on LED Displays.
+- Simplified timer display, designed to be easy to read on LED displays.
 - Message control panel to conveniently send messages via the timer displays between shooting ends.
 - Easy-to-use Wizard - to setup and run the entire timing and messaging system in just a few clicks.
-- Photo gallery which can be used on LED Displays during breaks.
+- Photo gallery which can be used on LED displays during breaks.
 
 ## System Requirements
 
@@ -22,7 +23,7 @@ This system acts as an improved timer for World Archery's [World Archery Timing 
 ## Setup
 
 - Download the file, either by downloading the zip archive from GitHub, or:
-  - ``git clone https://github.com/JamesPhillipsUK/better-wa-compatible-timer''
+  - `git clone https://github.com/JamesPhillipsUK/better-wa-compatible-timer`
 - Download a copy of the [World Archery timing system](https://web.archive.org/web/20260508224434/https://www.worldarchery.sport/sport/education/judging)
 - (Optional) Place the timing system executable file in the `src` folder.
   - If you place the executable file elsewhere, you can use the `-x [filepath]` flag when running the src/start.py manually, or, select the file using the Wizard.
@@ -55,6 +56,7 @@ Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser` first.
 
 - The LED display page is served on localhost:5500/led-display/led-display.html. (This can be changed manually by changing settings in LEDSetup.json)
 - The message control centre is localhost:5500/message-controller/messages.html.
+- The photo gallery is localhost:5500/photo-gallery/photo-gallery.html.
 - The WA Timing system feed is expected to run on localhost:5001.
 - The WA Timing system control centre is expected to run on localhost:5000.
 
@@ -78,12 +80,14 @@ Please report any bugs or quirks to [neualtournaments@gmail.com](mailto:neualtou
 
 ## Tested Systems
 
-| OS            | Version       | Python Version | WA Timing System Used                   | Working? |
-| :------------ | :------------ | :------------- | :-------------------------------------- | :------: |
-| Windows       | 11 Pro        | 3.14           | world_archery_timing_system-win-x64.exe | ✅       |
-| Windows       | 10 Education  | 3.14.5         | world_archery_timing_system-win-x64.exe | ✅       |
-| Ubuntu        | 24.04.4 LTS   | 3.12.3         | world_archery_timing_system-linux-x64   | ✅       |
-| Ubuntu Server | 26.04 LTS     | 3.14.4         | world_archery_timing_system-linux-x64   | ✅       |
+We have developed and tested this software on the following systems.  While we cannot guarantee the software will function perfectly on your system, if you have a similar system and your system meets the system requirements above, it is more likely to work.
+
+| OS            | OS Version       | Python Version | Software Version Tested | WA Timing System Used                   | Working? |
+| :------------ | :--------------- | :------------- | :---------------------- | :-------------------------------------- | :------: |
+| Windows       | 11 Pro           | 3.14           | 1.0.0                   | world_archery_timing_system-win-x64.exe | ✅       |
+| Windows       | 10 Education     | 3.14.5         | 1.1.0                   | world_archery_timing_system-win-x64.exe | ✅       |
+| Ubuntu        | 24.04.4 LTS      | 3.12.3         | 1.1.0                   | world_archery_timing_system-linux-x64   | ✅       |
+| Ubuntu Server | 26.04 LTS        | 3.14.4         | 1.1.0                   | world_archery_timing_system-linux-x64   | ✅       |
 
 ## Disclaimer
 
