@@ -118,12 +118,9 @@ class StateFile:
         imgExtensions = [".png",
                          ".jpg",
                          ".jpeg",
-                         ".bmp",
                          ".gif",
-                         ".tiff",
-                         ".webp"]
+                         ".tiff"]
         files = [f for f in os.listdir(imgPath)]
         images = [i for i in files if (i.lower().endswith(e)
                   for e in imgExtensions)]
         return json.dumps({"images": images})
-        #return "{\"images\": [\"Screenshot from 2026-05-14 22-34-10.png\",\"Screenshot from 2026-05-14 22-32-02.png\"]}"

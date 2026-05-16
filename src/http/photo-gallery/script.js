@@ -26,6 +26,7 @@ async function fetchImageList() {
  * Gets each new image requested from the list.
  **/
 function getNewImage() {
+  let loaded = false;
   if (currentImageIndex == imageArray.length - 1)
     currentImageIndex = 0;
   else
@@ -33,15 +34,19 @@ function getNewImage() {
   GALLERY_IMG.src = "./img/" + imageArray[currentImageIndex];
   GALLERY_IMG.alt = imageArray[currentImageIndex];
   GALLERY_IMG.onload = function () {
-    // Centres the image vertically and forces reload.
-    let viewportHeight = window.innerHeight;
-    let viewportWidth = window.innerWidth;
-    let imageNatWidth = GALLERY_IMG.naturalWidth;
-    let imageNatHeight = GALLERY_IMG.naturalHeight;
-    let imgRatio = imageNatHeight / imageNatWidth
-    let newImgHeight = imgRatio * viewportWidth
-    GALLERY_IMG.style.marginTop = (viewportHeight / 2) - (newImgHeight / 2) + "px";
-    GALLERY_IMG.src = GALLERY_IMG.src + "?time=" + new Date();
+    if (!loaded){
+      // Centres the image vertically and forces reload.
+      let viewportHeight = window.innerHeight;
+      let viewportWidth = window.innerWidth;
+      let imageNatWidth = GALLERY_IMG.naturalWidth;
+      let imageNatHeight = GALLERY_IMG.naturalHeight;
+      let imgRatio = imageNatHeight / imageNatWidth
+      let newImgHeight = imgRatio * viewportWidth
+      GALLERY_IMG.style.marginTop = (viewportHeight / 2) - (newImgHeight / 2) + "px";
+      let src = GALLERY_IMG.src.split('?')[0]
+      GALLERY_IMG.src = src + "?time=" + new Date();
+      loaded = true;
+    }
   };
 
 }

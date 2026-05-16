@@ -5,8 +5,10 @@ Author: Jesse Phillips <jesse@jessephillips.uk>
 Version 1.0.0
 """
 
-import json
 import os
+import json
+import base64
+import urllib
 import http.server
 import socketserver
 from typing import Tuple
@@ -51,6 +53,12 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
               file.endswith(".css")):
             with open(file, 'r', encoding="UTF-8") as fp:
                 return fp.read().encode()
+        elif (file.endswith(".gif") or file.endswith(".jpg")
+              or file.endswith(".jpeg") or file.endswith(".png")
+              or file.endswith(".tiff")):
+            with open(file, 'rb') as fp:
+                return fp.read()
+                #return base64.b64encode(fp.read())
         return None
 
     def generateAPIResponseHeaders(self, name: str) -> None:
@@ -132,6 +140,7 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         """ Handles all GET requests.
         """
+        self.path = self.path.split('?')[0]
         if self.path == "/api/message-state":
             self.send_response(HTTPStatus.OK)
             self.generateAPIResponseHeaders("/message-state")
@@ -145,6 +154,7 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(bytes(self.generateAPIResponse("/get-image-list"),
                                    encoding='utf8'))
         elif self.path.startswith('/'):
+            self.path = urllib.parse.unquote(self.path)
             requestedFile = f"src{os.sep}http{self.path.replace('/', os.sep)}"
             if not os.path.exists(requestedFile):
                 self.send_response(404)
@@ -166,6 +176,18 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
             elif self.path.endswith(".css"):
                 self.send_header("Content-Type",
                                  "text/css; charset=utf-8")
+            elif self.path.endswith(".gif"):
+                self.send_header("Content-Type",
+                                 "image/gif")
+            elif self.path.endswith(".png"):
+                self.send_header("Content-Type",
+                                 "image/png")
+            elif self.path.endswith(".tiff"):
+                self.send_header("Content-Type",
+                                 "image/tiff")
+            elif self.path.endswith(".jpg") or self.path.endswith(".jpeg"):
+                self.send_header("Content-Type",
+                                 "image/jpeg")
             else:
                 self.handleInternalServerError()
                 return
