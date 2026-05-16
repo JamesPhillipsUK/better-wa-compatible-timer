@@ -57,6 +57,9 @@ class Window(QMainWindow):
         fileButton = QPushButton("Find WA Timing System Install (optional).")
         fileButton.pressed.connect(self.onClickedFile)
         mainLayout.addWidget(fileButton)
+        galleryButton = QPushButton("Find Image Gallery (optional).")
+        galleryButton.pressed.connect(self.onClickedGallery)
+        mainLayout.addWidget(galleryButton)
         goButton = QPushButton("Run!")
         goButton.pressed.connect(self.onClickedGo)
         mainLayout.addWidget(goButton)
@@ -80,6 +83,19 @@ class Window(QMainWindow):
         """
         name = QFileDialog.getOpenFileName(None, 'Open file')
         self.executable = name[0]
+    
+    def onClickedGallery(self) -> None:
+        """ Selects the location of the image gallery.
+        """
+        dirDialogue = QFileDialog(self)
+        dirDialogue.setWindowTitle('Select a Folder')
+        dirDialogue.setFileMode(QFileDialog.Directory)
+        dirDialogue.setOption(QFileDialog.ShowDirsOnly, True)
+
+        if dirDialogue.exec_() == QFileDialog.Accepted:
+            folder = dirDialogue.selectedFiles()[0]
+            import imageGallery
+            imageGallery.run(folder)
 
     def onClickedGo(self) -> None:
         """ Runs the system when the go button is pressed.
