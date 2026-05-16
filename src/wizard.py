@@ -79,7 +79,7 @@ class Window(QMainWindow):
         """ Selects the location of the WA Executable file.
         """
         name = QFileDialog.getOpenFileName(None, 'Open file')
-        print(name[0])
+        self.executable = name[0]
 
     def onClickedGo(self) -> None:
         """ Runs the system when the go button is pressed.
