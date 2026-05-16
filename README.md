@@ -1,6 +1,7 @@
 # Better WA-Compatible Timer
 
 A better "World Archery Timing System"-compatible timer display for Archery.
+
 Version 1.1.0
 
 This system acts as an improved timer for World Archery's [World Archery Timing System](https://web.archive.org/web/20260508224434/https://www.worldarchery.sport/sport/education/judging).
