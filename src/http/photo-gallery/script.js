@@ -12,23 +12,27 @@ let currentImageIndex = -1;
  **/
 async function fetchImageList() {
   const response = await fetch(MESSAGE_API_BASE + "/api/get-image-list",
-                               {method: "GET",
-                                headers: {"Accept": "application/json"}}
-                              );
+                               {
+                                 method: "GET",
+                                 headers: { "Accept": "application/json" }
+                               });
   const data = await response.json();
   data.images.forEach(image => {
     imageArray.push(image);
   });
 }
 
-function getNewImage(){
+/**
+ * Gets each new image requested from the list.
+ **/
+function getNewImage() {
   if (currentImageIndex == imageArray.length - 1)
     currentImageIndex = 0;
   else
     currentImageIndex++;
   GALLERY_IMG.src = "./img/" + imageArray[currentImageIndex];
   GALLERY_IMG.alt = imageArray[currentImageIndex];
-  GALLERY_IMG.onload = function(){
+  GALLERY_IMG.onload = function () {
     // Centres the image vertically and forces reload.
     let viewportHeight = window.innerHeight;
     let viewportWidth = window.innerWidth;
@@ -42,10 +46,22 @@ function getNewImage(){
 
 }
 
-window.setInterval(getNewImage, 10000)
+function removeNotices() {
+  const notices = document.getElementsByClassName("notice");
+  while (notices.length > 0)
+    notices[0].parentNode.removeChild(notices[0]);
+}
 
-fetchImageList().then(tmp => {
-  imageArray.forEach(image => {
-    console.log(image);
+/**
+ * Handles getting and displaying images in the image gallery.
+ * Runs as soon as the list of images is returned.
+ **/
+window.setInterval(temp => {
+  fetchImageList().then(tmp => {
+    window.clearInterval();
+    removeNotices();
+    getNewImage();
+    window.setInterval(getNewImage, 10000)
   });
-});
+}, 10000);
+
