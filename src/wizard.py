@@ -57,7 +57,7 @@ class Window(QMainWindow):
         fileButton = QPushButton("Find WA Timing System Install (optional).")
         fileButton.pressed.connect(self.onClickedFile)
         mainLayout.addWidget(fileButton)
-        galleryButton = QPushButton("Find Image Gallery (optional).")
+        galleryButton = QPushButton("Run Image Gallery (optional).")
         galleryButton.pressed.connect(self.onClickedGallery)
         mainLayout.addWidget(galleryButton)
         goButton = QPushButton("Run!")
@@ -83,7 +83,7 @@ class Window(QMainWindow):
         """
         name = QFileDialog.getOpenFileName(None, 'Open file')
         self.executable = name[0]
-    
+
     def onClickedGallery(self) -> None:
         """ Selects the location of the image gallery.
         """

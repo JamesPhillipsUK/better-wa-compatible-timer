@@ -4,10 +4,12 @@
 Author: Jesse Phillips <jesse@jessephillips.uk>
 Version 1.0.0
 """
-import shutil
-import glob
-import sys
 import os
+import sys
+import json
+import glob
+import shutil
+import webbrowser
 galleryFolder = f"src{os.sep}http{os.sep}photo-gallery{os.sep}img"
 
 
@@ -57,16 +59,44 @@ def createNewGallery(galleryData: str) -> bool:
     return True
 
 
+def getGalleryURL(setupFile: str) -> str:
+    """ Gets the gallery URL based on the settings in LEDSetup.json.
+    Args:
+        setupFile (str): the filepath to LEDSetup.json
+    Returns:
+        str: the URL for the gallery.
+    """
+    with open(setupFile, 'r', encoding="UTF-8") as fp:
+        lEDSetup = json.load(fp)
+    if lEDSetup["ssl"]:
+        url = "https://"
+    else:
+        url = "http://"
+    url += lEDSetup["hostname"]
+    url += f":{lEDSetup["port"]}/photo-gallery/photo-gallery.html"
+    return url
+
+
+def openInBrowser() -> None:
+    """ Opens a browser window containing the gallery.
+    Returns:
+        bool: true if the window could be opened.
+    """
+    uRL = getGalleryURL(f"src{os.sep}LEDSetup.json")
+    display = webbrowser.open_new(uRL)
+
+
 def run(gallery: str) -> None:
     """ Makes the gallery folder when called.
     """
     if clearOldGallery():
         if createNewGallery(gallery):
-            pass
+            openInBrowser()
         else:
             raise GalleryException("Could not create new gallery files.")
     else:
         raise GalleryException("Could not remove old gallery files.")
+
 
 if __name__ == "__main__":
     gallery = sys.argv[-1]
