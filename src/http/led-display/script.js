@@ -196,7 +196,7 @@ function setLightAppearance(light, beacon) {
       topLabelEl.classList.add("black");
       bottomLabelEl.classList.add("black");
       secondaryEl.classList.add("black");
-      document.body.classList.add("bg-black");
+      document.body.classList.add("bg-red");
       break;
 
     default:
