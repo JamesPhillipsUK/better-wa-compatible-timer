@@ -66,7 +66,7 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
             Sets them using self.send_header - no need to return anything.
         """
         match name:
-            case "/message-state" | "/pending" | "/clear-pending" | "consume" \
+            case "/message-state" | "/pending" | "/clear-pending" | "/consume" \
                  | "/clear-active" | "/get-image-list":
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.send_header("Content-Type",

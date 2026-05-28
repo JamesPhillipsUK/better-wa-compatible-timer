@@ -18,10 +18,6 @@ let hasTriedConsumeThisExpiry = false;
 let fastCandidateSince = 0;
 let lastFastCandidateTime = null;
 
-function clearTimerColours() {
-  timerEl.classList.remove("red", "yellow", "green", "black");
-}
-
 function clearTextColours() {
   timerEl.classList.remove("red", "yellow", "green", "black");
   topLabelEl.classList.remove("red", "yellow", "green", "black");
@@ -81,7 +77,7 @@ function clearActiveMessage() {
     });
 }
 
-function tryConsumePendingMessageIfNeeded() {
+function tryConsumePendingMessageIfNeeded(whoShoots) {
 
   if (!wasInExpiryState || isConsumingMessage) {
     return;
@@ -94,6 +90,8 @@ function tryConsumePendingMessageIfNeeded() {
 
       if (wasInExpiryState && messageState.active) {
         showActiveMessage(messageState.active);
+      } else if (wasInExpiryState && whoShoots !== undefined) {
+        showNextDetail(whoShoots);
       }
 
       isConsumingMessage = false;
@@ -120,14 +118,68 @@ function showNormalTimer(time1) {
   timerEl.textContent = time1;
 }
 
+function getCurrentDetailLabel(whoShoots) {
+  switch (Number(whoShoots)) {
+    
+    case 5:
+    case 11:
+      return "A B";
+
+    case 6:
+    case 12:
+      return "C D";
+
+    case 13:
+      return "E F";
+
+    default:
+      return "";
+  }
+}
+
+function getNextDetailAfterEndLabel(whoShoots) {
+  switch (Number(whoShoots)) {
+
+    case 5:
+      return "A B";
+
+    case 6:
+      return "C D";
+
+    case 13:
+      return "C D";
+
+    case 11:
+      return "E F";
+
+    case 12:
+      return "A B";
+
+    default:
+      return "";
+  }
+}
+
 function showNextDetail(whoShoots) {
+  const ws = Number(whoShoots);
+  const nextDetailLabel = getNextDetailAfterEndLabel(whoShoots);
+
+  topLabelEl.textContent = "";
+  topLabelEl.style.display = "none";
+  timerEl.classList.remove("message-display", "fast-display", "detail-display");
+  timerEl.style.fontSize = "";
+  timerEl.textContent = "";
+  bottomLabelEl.textContent = "";
+  secondaryEl.textContent = "";
+
+  if (ws === 0 || !nextDetailLabel) {
+    return;
+  }
+
   topLabelEl.textContent = "NEXT DETAIL";
   topLabelEl.style.display = "block";
-  timerEl.classList.remove("message-display", "fast-display");
   timerEl.classList.add("detail-display");
-  timerEl.style.fontSize = "";
-  timerEl.textContent = whoShoots === 5 ? "A B" : "C D";
-  bottomLabelEl.textContent = "";
+  timerEl.textContent = nextDetailLabel;
 }
 
 function showActiveMessage(message) {
@@ -196,7 +248,7 @@ function setLightAppearance(light, beacon) {
       topLabelEl.classList.add("black");
       bottomLabelEl.classList.add("black");
       secondaryEl.classList.add("black");
-      document.body.classList.add("bg-black");
+      document.body.classList.add("bg-red");
       break;
 
     default:
@@ -216,13 +268,13 @@ function setMode(whoShoots) {
   bottomLabelEl.textContent = "";
   secondaryEl.textContent = "";
 
-  switch (whoShoots) {
+  switch (Number(whoShoots)) {
     case 5:
-      bottomLabelEl.textContent = "A B";
-      break;
-
     case 6:
-      bottomLabelEl.textContent = "C D";
+    case 11:
+    case 12:
+    case 13:
+      bottomLabelEl.textContent = getCurrentDetailLabel(whoShoots);
       break;
 
     case 9:
@@ -283,13 +335,13 @@ function isEndFinishedState(time1, light1, time2, light2, numbers, whoShoots) {
   const n = Number(numbers);
   const ws = Number(whoShoots);
 
-  const isNormalTwoDetailFinished =
-    t1 === 0 &&
-    l1 === 1 &&
-    t2 === 0 &&
-    l2 === 1 &&
-    n === 3 &&
-    (ws === 5 || ws === 6 || ws === 0);
+  const isNormalDetailFinished =
+  t1 === 0 &&
+  l1 === 1 &&
+  t2 === 0 &&
+  l2 === 1 &&
+  n === 3 &&
+  (ws === 5 || ws === 6 || ws === 11 || ws === 12 || ws === 13 || ws === 0);
 
   const isSingleDetailFinished =
     t1 === 0 &&
@@ -307,7 +359,7 @@ function isEndFinishedState(time1, light1, time2, light2, numbers, whoShoots) {
     n === 2 &&
     ws === 0;
 
-  return isNormalTwoDetailFinished || isSingleDetailFinished || isMakeupFinished;
+  return isNormalDetailFinished || isSingleDetailFinished || isMakeupFinished;
 }
 
 setDisconnectedState(true);
@@ -388,9 +440,8 @@ if (typeof io !== "undefined") {
     }
 
     if (isExpiryState && !messageState.active && !hasTriedConsumeThisExpiry) {
-
       hasTriedConsumeThisExpiry = true;
-      tryConsumePendingMessageIfNeeded();
+      tryConsumePendingMessageIfNeeded(whoShoots);
     }
 
     if (isFast) {
@@ -398,6 +449,8 @@ if (typeof io !== "undefined") {
     } else if (isExpiryState) {
       if (messageState.active) {
         showActiveMessage(messageState.active);
+      } else if (isConsumingMessage) {
+        // Wait for message check to finish before showing "NEXT DETAIL".
       } else {
         showNextDetail(whoShoots);
       }
