@@ -106,9 +106,12 @@ class StateFile:
         """
         state = self.readState()
         stateDict = json.loads(state)
-        stateDict["active"] = stateDict["pending"]
-        stateDict["pending"] = ""
-        self.writeState(stateDict)
+
+        if stateDict["pending"]:
+            stateDict["active"] = stateDict["pending"]
+            stateDict["pending"] = ""
+            self.writeState(stateDict)
+
         return self.readState()
     
     def getImageList(self) -> str:
