@@ -120,13 +120,33 @@ function showNormalTimer(time1) {
   timerEl.textContent = time1;
 }
 
+function getWhoShootsLabel(whoShoots) {
+  switch (Number(whoShoots)) {
+    case 5:
+    case 11:
+      return "A B";
+
+    case 6:
+    case 12:
+      return "C D";
+
+    case 13:
+      return "E F";
+
+    default:
+      return "";
+  }
+}
+
 function showNextDetail(whoShoots) {
+  const detailLabel = getWhoShootsLabel(whoShoots);
+
   topLabelEl.textContent = "NEXT DETAIL";
   topLabelEl.style.display = "block";
   timerEl.classList.remove("message-display", "fast-display");
   timerEl.classList.add("detail-display");
   timerEl.style.fontSize = "";
-  timerEl.textContent = whoShoots === 5 ? "A B" : "C D";
+  timerEl.textContent = detailLabel;
   bottomLabelEl.textContent = "";
 }
 
@@ -216,13 +236,13 @@ function setMode(whoShoots) {
   bottomLabelEl.textContent = "";
   secondaryEl.textContent = "";
 
-  switch (whoShoots) {
+  switch (Number(whoShoots)) {
     case 5:
-      bottomLabelEl.textContent = "A B";
-      break;
-
     case 6:
-      bottomLabelEl.textContent = "C D";
+    case 11:
+    case 12:
+    case 13:
+      bottomLabelEl.textContent = getWhoShootsLabel(whoShoots);
       break;
 
     case 9:
@@ -283,13 +303,13 @@ function isEndFinishedState(time1, light1, time2, light2, numbers, whoShoots) {
   const n = Number(numbers);
   const ws = Number(whoShoots);
 
-  const isNormalTwoDetailFinished =
-    t1 === 0 &&
-    l1 === 1 &&
-    t2 === 0 &&
-    l2 === 1 &&
-    n === 3 &&
-    (ws === 5 || ws === 6 || ws === 0);
+  const isNormalDetailFinished =
+  t1 === 0 &&
+  l1 === 1 &&
+  t2 === 0 &&
+  l2 === 1 &&
+  n === 3 &&
+  (ws === 5 || ws === 6 || ws === 11 || ws === 12 || ws === 13 || ws === 0);
 
   const isSingleDetailFinished =
     t1 === 0 &&
@@ -307,7 +327,7 @@ function isEndFinishedState(time1, light1, time2, light2, numbers, whoShoots) {
     n === 2 &&
     ws === 0;
 
-  return isNormalTwoDetailFinished || isSingleDetailFinished || isMakeupFinished;
+  return isNormalDetailFinished || isSingleDetailFinished || isMakeupFinished;
 }
 
 setDisconnectedState(true);
