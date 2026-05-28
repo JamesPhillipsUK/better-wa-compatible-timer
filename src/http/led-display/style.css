@@ -33,12 +33,13 @@ body {
 .top-label {
   display: none;
   position: absolute;
-  top: 18vh;
+  top: 13vh;
   left: 50%;
   transform: translateX(-50%);
-  font-size: min(12vw, 12vh);
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: min(20vw, 20vh);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  word-spacing: 0.35em;
   line-height: 1;
   white-space: nowrap;
 }
@@ -64,10 +65,10 @@ body {
 }
 
 .timer.detail-display {
-  font-size: min(44vw, 54vh);
+  font-size: min(50vw, 62vh);
   line-height: 1;
   letter-spacing: 0;
-  transform: translateY(4vh);
+  transform: translateY(10vh);
 }
 
 .timer.message-display {
