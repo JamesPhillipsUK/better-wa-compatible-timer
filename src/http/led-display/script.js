@@ -18,9 +18,12 @@ let hasTriedConsumeThisExpiry = false;
 let fastCandidateSince = 0;
 let lastFastCandidateTime = null;
 
+/* Thought about this after removing the other redundant function, this was from v0.0.1 and also isn't called for. 
+Commenting out just to check.
 function clearTimerColours() {
   timerEl.classList.remove("red", "yellow", "green", "black");
 }
+*/
 
 function clearTextColours() {
   timerEl.classList.remove("red", "yellow", "green", "black");
@@ -120,6 +123,8 @@ function showNormalTimer(time1) {
   timerEl.textContent = time1;
 }
 
+/* I think I can now delete this section as the function is no longer called for after introducting the two below. 
+I'm just commenting it out for the next push just in case deleting it fucks it.
 function getWhoShootsLabel(whoShoots) {
   switch (Number(whoShoots)) {
     case 5:
@@ -137,16 +142,59 @@ function getWhoShootsLabel(whoShoots) {
       return "";
   }
 }
+*/
+
+function getCurrentDetailLabel(whoShoots) {
+  switch (Number(whoShoots)) {
+    
+    case 5:
+    case 11:
+      return "A B";
+
+    case 6:
+    case 12:
+      return "C D";
+
+    case 13:
+      return "E F";
+
+    default:
+      return "";
+  }
+}
+
+function getNextDetailAfterEndLabel(whoShoots) {
+  switch (Number(whoShoots)) {
+
+    case 5:
+      return "A B";
+
+    case 6:
+      return "C D";
+
+    case 13:
+      return "C D";
+
+    case 11:
+      return "E F";
+
+    case 12:
+      return "A B";
+
+    default:
+      return "";
+  }
+}
 
 function showNextDetail(whoShoots) {
-  const detailLabel = getWhoShootsLabel(whoShoots);
+  const nextDetailLabel = getNextDetailAfterEndLabel(whoShoots);
 
   topLabelEl.textContent = "NEXT DETAIL";
   topLabelEl.style.display = "block";
   timerEl.classList.remove("message-display", "fast-display");
   timerEl.classList.add("detail-display");
   timerEl.style.fontSize = "";
-  timerEl.textContent = detailLabel;
+  timerEl.textContent = nextDetailLabel;
   bottomLabelEl.textContent = "";
 }
 
@@ -242,7 +290,7 @@ function setMode(whoShoots) {
     case 11:
     case 12:
     case 13:
-      bottomLabelEl.textContent = getWhoShootsLabel(whoShoots);
+      bottomLabelEl.textContent = getCurrentDetailLabel(whoShoots);
       break;
 
     case 9:
