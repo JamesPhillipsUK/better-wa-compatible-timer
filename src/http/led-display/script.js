@@ -77,7 +77,7 @@ function clearActiveMessage() {
     });
 }
 
-function tryConsumePendingMessageIfNeeded() {
+function tryConsumePendingMessageIfNeeded(whoShoots) {
 
   if (!wasInExpiryState || isConsumingMessage) {
     return;
@@ -90,6 +90,8 @@ function tryConsumePendingMessageIfNeeded() {
 
       if (wasInExpiryState && messageState.active) {
         showActiveMessage(messageState.active);
+      } else if (wasInExpiryState && whoShoots !== undefined) {
+        showNextDetail(whoShoots);
       }
 
       isConsumingMessage = false;
@@ -438,9 +440,8 @@ if (typeof io !== "undefined") {
     }
 
     if (isExpiryState && !messageState.active && !hasTriedConsumeThisExpiry) {
-
       hasTriedConsumeThisExpiry = true;
-      tryConsumePendingMessageIfNeeded();
+      tryConsumePendingMessageIfNeeded(whoShoots);
     }
 
     if (isFast) {
@@ -448,6 +449,8 @@ if (typeof io !== "undefined") {
     } else if (isExpiryState) {
       if (messageState.active) {
         showActiveMessage(messageState.active);
+      } else if (isConsumingMessage) {
+        // Wait for message check to finish before showing "NEXT DETAIL".
       } else {
         showNextDetail(whoShoots);
       }
