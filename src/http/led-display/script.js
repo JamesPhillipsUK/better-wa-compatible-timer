@@ -1,7 +1,7 @@
 /** JavaScript for led-display.html.
  *  @author: Philip Taylor
  *  @editor: Jesse Phillips
- *  @version: 1.0.0
+ *  @version: 1.1.0
  **/
 const timerEl = document.getElementById("timer");
 const topLabelEl = document.getElementById("topLabel");
@@ -17,6 +17,67 @@ let isConsumingMessage = false;
 let hasTriedConsumeThisExpiry = false;
 let fastCandidateSince = 0;
 let lastFastCandidateTime = null;
+
+const DETAIL_LABELS = {
+  5: { upper: "AB", lower: "ab" },
+  6: { upper: "CD", lower: "cd" },
+  11: { upper: "AB", lower: "ab" },
+  12: { upper: "CD", lower: "cd" },
+  13: { upper: "EF", lower: "ef" },
+};
+
+const TWO_DETAIL_CYCLE = [5, 6];
+const THREE_DETAIL_CYCLE = [11, 12, 13];
+
+let shootingOrderState = {
+  detailCount: 0,
+  endStart: null,
+  current: null,
+  lastLoaded: null,
+  hasStarted: false
+};
+
+let wasInDetailLoadedState = false;
+
+const SHOOTING_ORDER_STORAGE_KEY = "waShootingOrderState";
+
+function saveShootingOrderState() {
+  try {
+    sessionStorage.setItem(
+      SHOOTING_ORDER_STORAGE_KEY,
+      JSON.stringify({
+        shootingOrderState: shootingOrderState,
+        wasInDetailLoadedState: wasInDetailLoadedState
+      })
+    );
+  } catch (e) {
+    console.warn("Could not save shooting-order state", e);
+  }
+}
+
+function restoreShootingOrderState() {
+  try {
+    const saved = sessionStorage.getItem(SHOOTING_ORDER_STORAGE_KEY);
+
+    if (!saved) {
+      return;
+    }
+
+    const parsed = JSON.parse(saved);
+
+    if (parsed.shootingOrderState) {
+      shootingOrderState = parsed.shootingOrderState;
+    }
+
+    if (typeof parsed.wasInDetailLoadedState === "boolean") {
+      wasInDetailLoadedState = parsed.wasInDetailLoadedState;
+    }
+  } catch (e) {
+    console.warn("Could not restore shooting-order state", e);
+  }
+}
+
+restoreShootingOrderState();
 
 function clearTextColours() {
   timerEl.classList.remove("red", "yellow", "green", "black");
@@ -91,7 +152,7 @@ function tryConsumePendingMessageIfNeeded(whoShoots) {
       if (wasInExpiryState && messageState.active) {
         showActiveMessage(messageState.active);
       } else if (wasInExpiryState && whoShoots !== undefined) {
-        showNextDetail(whoShoots);
+        showNextPhase(whoShoots);
       }
 
       isConsumingMessage = false;
@@ -118,51 +179,209 @@ function showNormalTimer(time1) {
   timerEl.textContent = time1;
 }
 
-function getCurrentDetailLabel(whoShoots) {
-  switch (Number(whoShoots)) {
-    
-    case 5:
-    case 11:
-      return "A B";
-
-    case 6:
-    case 12:
-      return "C D";
-
-    case 13:
-      return "E F";
-
-    default:
-      return "";
-  }
-}
-
-function getNextDetailAfterEndLabel(whoShoots) {
-  switch (Number(whoShoots)) {
-
-    case 5:
-      return "A B";
-
-    case 6:
-      return "C D";
-
-    case 13:
-      return "C D";
-
-    case 11:
-      return "E F";
-
-    case 12:
-      return "A B";
-
-    default:
-      return "";
-  }
-}
-
-function showNextDetail(whoShoots) {
+  function getDetailCycle(whoShoots) {
   const ws = Number(whoShoots);
-  const nextDetailLabel = getNextDetailAfterEndLabel(whoShoots);
+
+  if (ws === 5 || ws === 6) {
+    return TWO_DETAIL_CYCLE;
+  }
+
+  if (ws === 11 || ws === 12 || ws === 13) {
+    return THREE_DETAIL_CYCLE;
+  }
+
+  return null;
+}
+
+function getNextInCycle(value, cycle) {
+  const index = cycle.indexOf(Number(value));
+  if (index === -1) return null;
+  return cycle[(index + 1) % cycle.length];
+}
+
+function getPreviousInCycle(value, cycle) {
+  const index = cycle.indexOf(Number(value));
+  if (index === -1) return null;
+  return cycle[(index - 1 + cycle.length) % cycle.length];
+}
+
+function getRotatedCycle(cycle, startValue) {
+  const index = cycle.indexOf(Number(startValue));
+  if (index === -1) return cycle.slice();
+  return cycle.slice(index).concat(cycle.slice(0, index));
+}
+
+function resyncShootingOrderToCurrentDetail() {
+  const ws = Number(shootingOrderState.current);
+  const cycle = getDetailCycle(ws);
+
+  if (!cycle) {
+    return;
+  }
+
+  shootingOrderState.detailCount = cycle.length;
+  shootingOrderState.endStart = ws;
+  shootingOrderState.current = ws;
+  shootingOrderState.lastLoaded = ws;
+  shootingOrderState.hasStarted = false;
+
+  wasInDetailLoadedState = false;
+
+  saveShootingOrderState();
+
+  setMode(ws);
+
+  console.log("Shooting order manually resynchronised to", ws);
+}
+
+function isDetailLoadedState(time1, light1, light2, whoShoots) {
+  return Number(time1) === 10 &&
+    Number(light1) === 1 &&
+    Number(light2) === 1 &&
+    getDetailCycle(whoShoots) !== null;
+}
+
+function observeShootingOrder(time1, light1, light2, whoShoots) {
+  const ws = Number(whoShoots);
+  const cycle = getDetailCycle(ws);
+  const isLoaded = isDetailLoadedState(time1, light1, light2, ws);
+  const isShooting =
+  Number(time1) > 0 &&
+  (Number(light1) === 2 || Number(light1) === 3);
+
+  if (!cycle) {
+    wasInDetailLoadedState = isLoaded;
+    return;
+  }
+
+  const modeChanged = shootingOrderState.detailCount !== cycle.length;
+  const isUninitialised = shootingOrderState.endStart === null;
+
+  if (modeChanged || isUninitialised) {
+  shootingOrderState.detailCount = cycle.length;
+  shootingOrderState.endStart = ws;
+  shootingOrderState.current = ws;
+  shootingOrderState.lastLoaded = ws;
+  shootingOrderState.hasStarted = isShooting;
+  } else {
+  shootingOrderState.current = ws;
+  }
+
+  if (
+    isLoaded &&
+    !shootingOrderState.hasStarted &&
+    shootingOrderState.lastLoaded !== ws
+  ) {
+    shootingOrderState.endStart = ws;
+    shootingOrderState.current = ws;
+    shootingOrderState.lastLoaded = ws;
+  }
+
+  if (isLoaded && !wasInDetailLoadedState) {
+    const previous = shootingOrderState.lastLoaded;
+
+    if (!modeChanged && !isUninitialised && previous !== null) {
+      let isNewEnd = false;
+
+      if (cycle.length === 2) {
+        isNewEnd = previous === ws;
+      } else {
+        isNewEnd = ws === getPreviousInCycle(previous, cycle);
+      }
+
+      if (isNewEnd) {
+        shootingOrderState.endStart = ws;
+        shootingOrderState.hasStarted = false;
+      } else {
+        const expectedNext = getNextInCycle(previous, cycle);
+
+        if (cycle.length === 3 && ws !== previous && ws !== expectedNext) {
+          shootingOrderState.endStart = ws;
+        }
+      }
+    }
+
+    shootingOrderState.lastLoaded = ws;
+  }
+
+  if (isShooting) {
+  shootingOrderState.hasStarted = true;
+  }
+
+  wasInDetailLoadedState = isLoaded;
+
+  if (isShooting) {
+  shootingOrderState.hasStarted = true;
+  }
+
+  wasInDetailLoadedState = isLoaded;
+  saveShootingOrderState();
+}
+
+function formatShootingOrder(order, activeWhoShoots) {
+  const active = Number(activeWhoShoots);
+
+  return order.map(function (ws) {
+    const labels = DETAIL_LABELS[ws];
+    return ws === active ? labels.upper : labels.lower;
+  }).join(" ");
+}
+
+function formatCollectingOrder(order) {
+  return order.map(function (ws) {
+    return DETAIL_LABELS[ws].upper;
+  }).join(" ");
+}
+
+function getCurrentShootingOrderLabel(whoShoots) {
+  const ws = Number(whoShoots);
+  const cycle = getDetailCycle(ws);
+
+  if (!cycle) return "";
+
+  const start = shootingOrderState.endStart !== null
+    ? shootingOrderState.endStart
+    : ws;
+
+  const order = getRotatedCycle(cycle, start);
+  return formatShootingOrder(order, ws);
+}
+
+function getExpiryDisplay(whoShoots) {
+  const ws = Number(whoShoots);
+  const cycle = getDetailCycle(ws);
+
+  if (!cycle || shootingOrderState.endStart === null) {
+    return null;
+  }
+
+  const order = getRotatedCycle(cycle, shootingOrderState.endStart);
+  const currentIndex = order.indexOf(ws);
+
+  if (currentIndex === -1) {
+    return null;
+  }
+
+  if (currentIndex < order.length - 1) {
+    const nextDetail = order[currentIndex + 1];
+
+    return {
+      title: "NEXT DETAIL",
+      label: formatShootingOrder(order, nextDetail)
+    };
+  }
+
+  const nextEndStart = getNextInCycle(shootingOrderState.endStart, cycle);
+  const nextEndOrder = getRotatedCycle(cycle, nextEndStart);
+
+  return {
+    title: "NEXT END",
+    label: formatCollectingOrder(nextEndOrder)
+  };
+}
+
+function showNextPhase(whoShoots) {
+  const display = getExpiryDisplay(whoShoots);
 
   topLabelEl.textContent = "";
   topLabelEl.style.display = "none";
@@ -172,17 +391,23 @@ function showNextDetail(whoShoots) {
   bottomLabelEl.textContent = "";
   secondaryEl.textContent = "";
 
-  if (ws === 0 || !nextDetailLabel) {
+  if (!display) {
     return;
   }
 
-  topLabelEl.textContent = "NEXT DETAIL";
+  topLabelEl.textContent = display.title;
   topLabelEl.style.display = "block";
   timerEl.classList.add("detail-display");
-  timerEl.textContent = nextDetailLabel;
+
+  // The full Danage-style order is wider than the old two-letter display.
+  timerEl.style.fontSize = shootingOrderState.detailCount === 3
+    ? "min(18vw, 46vh)"
+    : "min(24vw, 50vh)";
+
+  timerEl.textContent = display.label;
 }
 
-function showActiveMessage(message) {
+  function showActiveMessage(message) {
   topLabelEl.textContent = "";
   topLabelEl.style.display = "none";
   timerEl.classList.remove("detail-display", "fast-display");
@@ -209,6 +434,7 @@ function setDisconnectedState(isDisconnected) {
     secondaryEl.textContent = "";
     fastCandidateSince = 0;
     lastFastCandidateTime = null;
+    wasInDetailLoadedState = false;
   } else {
     document.body.classList.remove("disconnected");
   }
@@ -274,7 +500,7 @@ function setMode(whoShoots) {
     case 11:
     case 12:
     case 13:
-      bottomLabelEl.textContent = getCurrentDetailLabel(whoShoots);
+      bottomLabelEl.textContent = getCurrentShootingOrderLabel(whoShoots);
       break;
 
     case 9:
@@ -295,7 +521,7 @@ function isFastState(time1, light1, light2) {
     return false;
   }
 
-  // Exception: the normal "next end loaded" red waiting state at 10 seconds is not FAST.
+  // Exception: the normal red 10-second detail-loaded state is not FAST.
   if (time1 === 10) {
     fastCandidateSince = 0;
     lastFastCandidateTime = null;
@@ -362,6 +588,12 @@ function isEndFinishedState(time1, light1, time2, light2, numbers, whoShoots) {
   return isNormalDetailFinished || isSingleDetailFinished || isMakeupFinished;
 }
 
+document.addEventListener("keydown", function (event) {
+  if (event.key.toLowerCase() === "r") {
+    resyncShootingOrderToCurrentDetail();
+  }
+});
+
 setDisconnectedState(true);
 
 if (typeof io !== "undefined") {
@@ -418,6 +650,7 @@ if (typeof io !== "undefined") {
     setDisconnectedState(false);
 
     setLightAppearance(light1, beacon);
+    observeShootingOrder(time1, light1, light2, whoShoots);
     setMode(whoShoots);
 
     const numericTime1 = Number(time1);
@@ -450,9 +683,9 @@ if (typeof io !== "undefined") {
       if (messageState.active) {
         showActiveMessage(messageState.active);
       } else if (isConsumingMessage) {
-        // Wait for message check to finish before showing "NEXT DETAIL".
+        // Wait for message check to finish before showing next transition.
       } else {
-        showNextDetail(whoShoots);
+        showNextPhase(whoShoots);
       }
     } else {
       showNormalTimer(time1);
