@@ -3,154 +3,524 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Timing Display Control Hub</title>
+  <title>Timing Control Hub</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      background: #eef0f4;
-      color: #20202a;
-      font-family: Arial, sans-serif;
-    }
-
-    header {
-      background: #440046;
-      color: white;
-      padding: 24px;
-    }
-
-    header h1 {
-      margin: 0 0 8px;
-      font-size: 28px;
-    }
-
-    header p {
-      margin: 0;
-      line-height: 1.5;
+      background: #f3f6fa;
+      color: #252025;
+      font: 13px Arial, sans-serif;
     }
 
     main {
+      width: 96%;
       max-width: 1500px;
-      margin: 0 auto;
-      padding: 20px;
+      margin: 12px auto;
     }
 
-    .controls {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 20px;
-      align-items: start;
+    h1 {
+      margin: 0;
+      padding: 8px 12px;
+      background: #440046;
+      color: white;
+      font-size: 16px;
+      text-align: center;
     }
 
-    section {
-      min-width: 0;
+    .section-title {
+      margin: 0;
+      padding: 7px 10px;
+      background: #e7d9e8;
+      color: #440046;
+      font-size: 13px;
+      font-weight: bold;
+      border-top: 1px solid #bda8c0;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #fcfcfe;
+      border-bottom: 1px solid #e0dce3;
+    }
+
+    label, .row-label {
+      font-weight: bold;
+      min-width: 100px;
+    }
+
+    input, select, button {
+      font: inherit;
+      min-height: 28px;
+      border: 1px solid #aaa;
+      border-radius: 2px;
+    }
+
+    input, select {
+      padding: 4px 6px;
       background: white;
-      border: 1px solid #d9dce3;
-      border-radius: 10px;
-      overflow: hidden;
+      color: #252025;
     }
 
-    .section-heading {
+    button {
+      padding: 4px 10px;
+      background: #f1f1f1;
+      color: #252025;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: #440046;
+      border-color: #440046;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    button:hover:not(:disabled) {
+      filter: brightness(0.94);
+    }
+
+    input:focus-visible,
+    select:focus-visible,
+    button:focus-visible,
+    summary:focus-visible {
+      outline: 2px solid #804583;
+      outline-offset: 2px;
+    }
+
+    #messageInput {
+      flex: 1 1 260px;
+      min-width: 160px;
+    }
+
+    .muted {
+      color: #625b65;
+      font-size: 12px;
+    }
+
+    .message-value {
+      flex: 1;
+      min-width: 150px;
+      overflow-wrap: anywhere;
+    }
+
+    .empty { color: #777; font-style: italic; }
+
+    details {
+      border-bottom: 1px solid #cfc4d1;
+      background: #fcfcfe;
+    }
+
+    summary {
+      padding: 8px 10px;
+      background: #e7d9e8;
+      color: #440046;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .help {
+      padding: 8px 12px;
+      line-height: 1.5;
+    }
+
+    .help p { margin: 5px 0; }
+
+    #feedback {
+      margin: 0;
+      padding: 8px 10px;
+      min-height: 32px;
+      background: #fcfcfe;
+    }
+
+    .connection {
+      padding: 6px 10px;
+      color: #625b65;
+      font-size: 12px;
+    }
+
+    body.embedded { background: transparent; }
+    body.embedded main { width: 100%; margin: 0; }
+    body.embedded h1 { display: none; }
+
+    @media (max-width: 550px) {
+      main { width: 100%; margin: 0; }
+      label, .row-label { min-width: 80px; }
+      #detailStyle { max-width: 100%; }
+    }
+
+    .section-with-link {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 16px;
-      border-bottom: 1px solid #d9dce3;
+      gap: 8px;
     }
 
-    h2 {
-      margin: 0;
-      font-size: 21px;
+    .section-link {
+      color: #440046;
+      font-size: 12px;
+      font-weight: normal;
+      text-decoration: underline;
     }
 
-    a {
-      color: #45216b;
-    }
-
-    a:focus-visible {
-      outline: 3px solid #c283ff;
-      outline-offset: 4px;
-    }
-
-    iframe {
-      display: block;
-      width: 100%;
-      height: 850px;
-      border: 0;
-      background: white;
-    }
-
-    .detail-frame {
-      height: 700px;
-    }
-
-    .note {
-      line-height: 1.5;
-      color: #505461;
-    }
-
-    @media (max-width: 950px) {
-      .controls {
-        grid-template-columns: minmax(0, 1fr);
-      }
-
-      main {
-        padding: 12px;
-      }
+    .section-link:focus-visible {
+      outline: 2px solid #804583;
+      outline-offset: 2px;
     }
   </style>
 </head>
 
 <body>
-  <header>
+  <main id="hub">
     <h1>Timing Control Hub</h1>
-    <p>Messages and detail settings for the timing display.</p>
-  </header>
 
-  <main>
-    <div class="controls">
-      <section aria-labelledby="messages-heading">
-        <div class="section-heading">
-          <h2 id="messages-heading">Message centre</h2>
-          <a href="/message-controller/messages.html"
-             target="_blank" rel="noopener">
-            Open separately ↗
-          </a>
-        </div>
+    <h2 class="section-title">Detail display</h2>
+    <form id="detailForm" class="row">
+      <label for="detailStyle">Two details</label>
+      <select id="detailStyle" disabled>
+        <option value="ABCD">AB / CD</option>
+        <option value="ABCDEF">ABC / DEF</option>
+      </select>
+      <button id="saveStyle" type="submit" disabled>Save</button>
+      <span id="savedStyle" class="muted">Loading…</span>
+    </form>
 
-        <iframe
-          src="/message-controller/messages.html"
-          title="Message centre">
-        </iframe>
-      </section>
+    <h2 class="section-title section-with-link">
+      <span>Message centre</span>
+      <a class="section-link"
+         href="/message-controller/messages.html"
+         target="_blank"
+         rel="noopener"
+         aria-label="Open message centre in a separate tab">
+        Open separately ↗
+      </a>
+    </h2>
+    <form id="messageForm" class="row">
+      <label for="messageInput">Message</label>
+      <input id="messageInput" type="text" maxlength="40"
+             placeholder="Enter a display message"
+             autocomplete="off">
+      <span id="charCount" class="muted">0 / 40</span>
+      <button id="queueMessage" class="primary"
+              type="submit" disabled>Queue message</button>
+    </form>
 
-      <section aria-labelledby="details-heading">
-        <div class="section-heading">
-          <h2 id="details-heading">Detail display</h2>
-          <a href="/display-control.html"
-             target="_blank" rel="noopener">
-            Open separately ↗
-          </a>
-        </div>
-
-        <iframe
-          class="detail-frame"
-          src="/display-control.html"
-          title="Detail display settings">
-        </iframe>
-      </section>
+    <div class="row">
+      <span class="row-label">Queued</span>
+      <span id="pendingMessage" class="message-value">Loading…</span>
+      <button id="clearPending" type="button" disabled>
+        Clear queued
+      </button>
     </div>
 
-    <p class="note">
-      Message controls follow the normal timing cycle.
-      Saved detail settings apply automatically to connected displays.
-    </p>
+    <div class="row">
+      <span class="row-label">Active</span>
+      <span id="activeMessage" class="message-value">Loading…</span>
+      <button id="clearActive" type="button" disabled>
+        Clear active
+      </button>
+    </div>
+
+    <details>
+      <summary>Message presets</summary>
+      <div class="row">
+        <button type="button" data-message="RESTART AT ">
+          Restart at…
+        </button>
+        <button type="button" data-message="DRINK WATER">
+          Drink water
+        </button>
+        <button type="button" data-message="REAPPLY SUNCREAM">
+          Reapply suncream
+        </button>
+        <span class="muted">Select, edit if needed, then queue.</span>
+      </div>
+    </details>
+
+    <details>
+      <summary>Help</summary>
+      <div class="help">
+        <p>
+          <strong>Details:</strong> the selection affects two-detail
+          shooting only. Three details remain AB / CD / EF;
+          single-detail shooting shows no letters.
+        </p>
+        <p>
+          <strong>Messages:</strong> queue a message for the display’s
+          normal message point in the timing cycle. This is not an
+          immediate screen override. Maximum length: 40 characters.
+        </p>
+        <p>
+          Saving a detail setting updates connected displays
+          automatically and persists after a server restart.
+        </p>
+      </div>
+    </details>
+
+    <p id="feedback" role="status" aria-live="polite">Ready.</p>
+    <div id="connection" class="connection">
+      Connecting to display controls…
+    </div>
   </main>
+
+  <script>
+    const byId = id => document.getElementById(id);
+
+    const styleSelect = byId("detailStyle");
+    const input = byId("messageInput");
+    const feedback = byId("feedback");
+
+    let savedStyle = null;
+    let settingsDirty = false;
+    let messages = { pending: "", active: "" };
+    let ready = false;
+    let busy = false;
+    let revision = 0;
+
+    if (new URLSearchParams(location.search).get("embedded") === "1") {
+      document.body.classList.add("embedded");
+    }
+
+    function styleLabel(value) {
+      return value === "ABCDEF" ? "ABC / DEF" : "AB / CD";
+    }
+
+    function updateButtons() {
+      styleSelect.disabled = !ready || busy;
+      byId("saveStyle").disabled = !ready || busy;
+      byId("queueMessage").disabled =
+        !ready || busy || !input.value.trim();
+      byId("clearPending").disabled =
+        !ready || busy || !messages.pending;
+      byId("clearActive").disabled =
+        !ready || busy || !messages.active;
+    }
+
+    function renderSettings(settings) {
+      if (!settings ||
+          !["ABCD", "ABCDEF"].includes(settings.twoDetailStyle)) {
+        throw new Error("Invalid settings response.");
+      }
+
+      savedStyle = settings.twoDetailStyle;
+
+      if (!settingsDirty) {
+        styleSelect.value = savedStyle;
+      }
+
+      byId("savedStyle").textContent =
+        "Saved: " + styleLabel(savedStyle) +
+        (settingsDirty ? " · Selection not saved" : "");
+    }
+
+    function renderMessages(state) {
+      if (!state ||
+          typeof state.pending !== "string" ||
+          typeof state.active !== "string") {
+        throw new Error("Invalid message response.");
+      }
+
+      messages = { pending: state.pending, active: state.active };
+
+      for (const [id, value] of [
+        ["pendingMessage", messages.pending],
+        ["activeMessage", messages.active]
+      ]) {
+        byId(id).textContent = value || "None";
+        byId(id).classList.toggle("empty", !value);
+      }
+
+      updateButtons();
+    }
+
+    async function api(path, data) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+
+      try {
+        const options = {
+          cache: "no-store",
+          signal: controller.signal,
+          headers: { Accept: "application/json" }
+        };
+
+        if (data !== undefined) {
+          options.method = "POST";
+          options.headers["Content-Type"] = "application/json";
+          options.body = JSON.stringify(data);
+        }
+
+        const response = await fetch(path, options);
+
+        if (!response.ok) {
+          throw new Error("Server returned HTTP " + response.status);
+        }
+
+        return await response.json();
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    async function refreshState() {
+      if (busy) {
+        setTimeout(refreshState, 2000);
+        return;
+      }
+
+      const requestRevision = revision;
+
+      try {
+        const [settings, state] = await Promise.all([
+          api("/api/display-settings"),
+          api("/api/message-state")
+        ]);
+
+        // Do not let an older poll overwrite a newer button action.
+        if (requestRevision !== revision) return;
+
+        renderSettings(settings);
+        renderMessages(state);
+        ready = true;
+        byId("connection").textContent = "Display controls connected.";
+      } catch (error) {
+        if (requestRevision !== revision) return;
+
+        ready = false;
+        byId("connection").textContent =
+          "Cannot refresh controls. Displayed values may be old; retrying…";
+        console.warn(error);
+      } finally {
+        updateButtons();
+        setTimeout(refreshState, 2000);
+      }
+    }
+
+    async function performAction(action) {
+      if (busy || !ready) return;
+
+      busy = true;
+      revision++;
+      updateButtons();
+      feedback.textContent = "Saving…";
+
+      try {
+        await action();
+      } catch (error) {
+        feedback.textContent =
+          "Could not confirm the change. Check the saved state before retrying.";
+        console.warn(error);
+      } finally {
+        busy = false;
+        updateButtons();
+      }
+    }
+
+    styleSelect.addEventListener("change", function () {
+      settingsDirty = styleSelect.value !== savedStyle;
+      renderSettings({ twoDetailStyle: savedStyle });
+    });
+
+    byId("detailForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      performAction(async function () {
+        const settings = await api("/api/display-settings", {
+          twoDetailStyle: styleSelect.value
+        });
+
+        settingsDirty = false;
+        renderSettings(settings);
+        feedback.textContent =
+          "Saved " + styleLabel(savedStyle) + ". Displays update automatically.";
+      });
+    });
+
+    function updateInput() {
+      byId("charCount").textContent = input.value.length + " / 40";
+      updateButtons();
+    }
+
+    input.addEventListener("input", updateInput);
+
+    byId("messageForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+      const message = input.value.trim().slice(0, 40);
+      if (!message) return;
+
+      performAction(async function () {
+        const state = await api("/api/message-state/pending", { message });
+        renderMessages(state);
+
+        // Preserve any new text typed while the request was running.
+        if (input.value.trim() === message) {
+          input.value = "";
+        }
+
+        updateInput();
+        feedback.textContent = "Message queued.";
+      });
+    });
+
+    byId("clearPending").addEventListener("click", function () {
+      performAction(async function () {
+        renderMessages(await api("/api/message-state/clear-pending", {}));
+        feedback.textContent = "Queued message cleared.";
+      });
+    });
+
+    byId("clearActive").addEventListener("click", function () {
+      performAction(async function () {
+        renderMessages(await api("/api/message-state/clear-active", {}));
+        feedback.textContent = "Active message cleared.";
+      });
+    });
+
+    document.querySelectorAll("[data-message]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        input.value = button.dataset.message;
+        updateInput();
+        input.focus();
+      });
+    });
+
+    // Tell the IANSEO wrapper how much height this page needs.
+    if (window.parent !== window && document.referrer) {
+      const parentOrigin = new URL(document.referrer).origin;
+      let previousHeight = 0;
+
+      function reportHeight() {
+        const height = Math.ceil(
+          byId("hub").getBoundingClientRect().height
+        ) + 2;
+
+        if (height === previousHeight) return;
+        previousHeight = height;
+
+        window.parent.postMessage({
+          type: "timing-hub-height",
+          height: height
+        }, parentOrigin);
+      }
+
+      const heightObserver = new ResizeObserver(reportHeight);
+      heightObserver.observe(byId("hub"));
+      window.addEventListener("load", reportHeight);
+      reportHeight();
+    }
+
+    refreshState();
+  </script>
 </body>
 </html>

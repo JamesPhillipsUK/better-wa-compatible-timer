@@ -27,6 +27,7 @@ class Flags:
     firstTime: bool = False
     executableElsewhere: bool = False
     executable: str = ""
+    noBrowser: bool = False
 
 
 class FailedSetupException(Exception):
@@ -105,7 +106,8 @@ def startDisplay() -> None:
     timerThread = threading.Thread(target=timer.runServer, args=[])
     timerThread.start()
     time.sleep(1)
-    openDisplayInBrowser()
+    if not Flags.noBrowser:
+        openDisplayInBrowser()
     timerThread.join()
 
 
@@ -148,6 +150,8 @@ if __name__ == "__main__":
                 Flags.firstTime = True
             if 'd' in item:
                 Flags.displayOnly = True
+            if 'n' in item:
+                Flags.noBrowser = True                
             if 'x' in item:
                 Flags.executableElsewhere = True
     if Flags.executableElsewhere:

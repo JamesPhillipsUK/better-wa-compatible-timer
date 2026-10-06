@@ -96,67 +96,126 @@ $startupMessage = $_SESSION['timing_start_result'] ?? '';
 unset($_SESSION['timing_start_result']);
 
 $PAGE_TITLE = 'Timing Control Hub';
-
 include('Common/Templates/head.php');
 ?>
 
 <style>
     #timing-control-module {
-        margin: 16px auto;
-        width: 98%;
+        width: 96%;
+        max-width: 1500px;
+        margin: 10px auto;
+        color: #252025;
+        font: 13px Arial, sans-serif;
     }
 
-    #timing-control-module .timing-heading {
-        background: #440046;
-        color: white;
-        padding: 16px 20px;
-        border-radius: 8px 8px 0 0;
+    #timing-control-module * {
+        box-sizing: border-box;
     }
 
     #timing-control-module h1 {
-        color: white;
         margin: 0;
-        font-size: 24px;
+        padding: 8px 12px;
+        background: #440046;
+        color: white;
+        font-size: 16px;
+        text-align: center;
     }
 
-    #timing-control-module .timing-help {
-        padding: 12px 20px;
-        background: #f2f3f5;
-        color: #222;
-        line-height: 1.5;
+    #timing-control-module .timing-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 14px;
+        padding: 8px 10px;
+        background: #fcfcfe;
+        border-bottom: 1px solid #cfc4d1;
     }
 
-    #timing-control-module a {
-        color: #440046;
-        text-decoration: underline;
+    #timing-start-form {
+        margin: 0;
+    }
+
+    #timing-start-button {
+        padding: 4px 10px;
+        min-height: 28px;
+        background: #440046;
+        color: white;
+        border: 1px solid #440046;
+        border-radius: 2px;
+        font: inherit;
+        cursor: pointer;
+    }
+
+    #timing-start-button:disabled {
+        opacity: 0.55;
+        cursor: default;
+    }
+
+    #timing-control-help {
+        flex: 1;
+        margin: 0;
+        min-width: 180px;
+    }
+
+    #timing-display-link,
+    #timing-wa-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        padding: 4px 10px;
+        background: #440046;
+        color: white;
+        border: 1px solid #440046;
+        border-radius: 2px;
+        font: inherit;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    #timing-display-link:hover,
+    #timing-wa-link:hover {
+        background: #602262;
+    }
+
+    #timing-display-link:focus-visible,
+    #timing-wa-link:focus-visible {
+        outline: 2px solid #804583;
+        outline-offset: 2px;
+    }
+
+    #timing-start-result {
+        margin: 0;
+        padding: 8px 10px;
+        background: #fff4d2;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
     }
 
     #timing-control-frame {
         display: block;
         width: 100%;
-        height: 1150px;
-        border: 1px solid #ddd;
-        background: #eef0f4;
+        height: 420px;
+        border: 0;
+        background: transparent;
     }
 
-    @media (max-width: 1000px) {
-        #timing-control-frame {
-            height: 1900px;
+    #timing-control-module [hidden] {
+        display: none !important;
+    }
+
+    @media (max-width: 550px) {
+        #timing-control-module {
+            width: 100%;
         }
-    }
-
-    #timing-control-frame[hidden] {
-        display: none;
     }
 </style>
 
 <div id="timing-control-module">
-    <div class="timing-heading">
-        <h1>Timing Control Hub</h1>
-    </div>
+    <h1>Timing Control</h1>
 
-    <div class="timing-help">
-        <form method="post" action="index.php">
+    <div class="timing-toolbar">
+        <form id="timing-start-form" method="post" action="index.php">
             <input
                 type="hidden"
                 name="timing_start_token"
@@ -166,36 +225,36 @@ include('Common/Templates/head.php');
                     'UTF-8'
                 ); ?>">
 
-            <button
-                type="submit"
-                style="background:#440046; color:white; border:0;
-                       border-radius:6px; padding:12px 18px;
-                       font-size:16px; cursor:pointer;">
+            <button id="timing-start-button" type="submit" disabled>
                 Start Everything
             </button>
         </form>
 
-        <?php if ($startupMessage !== ''): ?>
-            <p role="status">
-                <?php echo htmlspecialchars(
-                    $startupMessage,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ); ?>
-            </p>
-        <?php endif; ?>
-        <p>
-            <a id="timing-control-link"
-               target="_blank"
-               rel="noopener"
-               hidden>Open controls in a separate tab ↗</a>
+        <p id="timing-control-help"
+           role="status"
+           aria-live="polite">
+            Checking display server…
         </p>
-        <p id="timing-control-help">
-            The timing display server must be running on this
-            IANSEO computer. If the controls below cannot load,
-            start it using the usual launcher, then refresh this page.
-        </p>
+
+        <a id="timing-display-link"
+           target="_blank"
+           rel="noopener"
+           hidden>Open display ↗</a>
+
+        <a id="timing-wa-link"
+           target="_blank"
+           rel="noopener">Open WA controls ↗</a>
     </div>
+
+    <?php if ($startupMessage !== ''): ?>
+        <p id="timing-start-result" role="status">
+            <?php echo htmlspecialchars(
+                $startupMessage,
+                ENT_QUOTES,
+                'UTF-8'
+            ); ?>
+        </p>
+    <?php endif; ?>
 
     <iframe
         id="timing-control-frame"
@@ -204,28 +263,35 @@ include('Common/Templates/head.php');
     </iframe>
 
     <noscript>
-        Please enable JavaScript to load the timing controls.
+        Please enable JavaScript to use the timing controls.
     </noscript>
 </div>
 
 <script>
 (function () {
     const frame = document.getElementById("timing-control-frame");
-    const link = document.getElementById("timing-control-link");
+    const displayLink = document.getElementById("timing-display-link");
     const help = document.getElementById("timing-control-help");
+    const startButton = document.getElementById("timing-start-button");
+    const startForm = document.getElementById("timing-start-form");
+    const startResult = document.getElementById("timing-start-result");
 
     const hubUrl = new URL("http://localhost:5500/control-hub.html");
     hubUrl.hostname = window.location.hostname;
 
+    const displayUrl = new URL("/led-display/led-display.html", hubUrl);
+    displayLink.href = displayUrl.href;
+    const waControlUrl = new URL("http://localhost:5000/");
+    waControlUrl.hostname = window.location.hostname;
+    document.getElementById("timing-wa-link").href = waControlUrl.href;
+
+    // The embedded version uses IANSEO's heading instead.
+    hubUrl.searchParams.set("embedded", "1");
+
     const statusUrl = new URL("status.php", window.location.href);
     const usesHttps = window.location.protocol === "https:";
     let frameLoaded = false;
-
-    link.href = hubUrl.href;
-    link.hidden = true;
-
-    help.setAttribute("role", "status");
-    help.setAttribute("aria-live", "polite");
+    let submitting = false;
 
     function showStatus(message) {
         if (help.textContent !== message) {
@@ -233,15 +299,39 @@ include('Common/Templates/head.php');
         }
     }
 
+    window.addEventListener("message", function (event) {
+        if (event.origin !== hubUrl.origin ||
+            event.source !== frame.contentWindow) {
+            return;
+        }
+
+        const data = event.data;
+
+        if (!data || data.type !== "timing-hub-height" ||
+            typeof data.height !== "number" ||
+            !Number.isFinite(data.height) ||
+            data.height < 100 || data.height > 10000) {
+            return;
+        }
+
+        frame.style.height = Math.ceil(data.height) + "px";
+    });
+
     function unloadControls() {
         frame.hidden = true;
-        link.hidden = true;
+        displayLink.hidden = true;
 
         if (frameLoaded) {
             frame.src = "about:blank";
             frameLoaded = false;
         }
     }
+
+    startForm.addEventListener("submit", function () {
+        submitting = true;
+        startButton.disabled = true;
+        showStatus("Requesting startup…");
+    });
 
     async function checkServer() {
         const controller = new AbortController();
@@ -265,29 +355,37 @@ include('Common/Templates/head.php');
                 throw new Error("Invalid status response.");
             }
 
+            if (submitting) return;
+
             if (!status.displayServerReachable) {
                 unloadControls();
-                showStatus(
-                    "Display server is not responding. Start it using " +
-                    "the usual launcher; this page will reconnect automatically."
-                );
+                startButton.disabled = false;
+                showStatus("Display server: not responding.");
+                help.title =
+                    "Start the server or check its console. " +
+                    "This page reconnects automatically.";
                 return;
             }
 
-            link.hidden = false;
+            startButton.disabled = true;
+            displayLink.hidden = false;
+
+            if (startResult) {
+                startResult.hidden = true;
+            }
+
+            help.title =
+                "The display server answers requests. " +
+                "This does not verify the WA timing feed.";
 
             if (usesHttps) {
                 showStatus(
-                    "Display server is responding. Use the separate-tab " +
-                    "link to open its HTTP controls from this HTTPS page."
+                    "Display server: responding. Embedded HTTP controls require opening IANSEO over HTTP."
                 );
                 return;
             }
 
-            showStatus(
-                "Display server is responding. " +
-                "This does not confirm that WA timing data is arriving."
-            );
+            showStatus("Display server: responding.");
 
             if (!frameLoaded) {
                 frame.src = hubUrl.href;
@@ -297,10 +395,11 @@ include('Common/Templates/head.php');
             frame.hidden = false;
 
         } catch (error) {
-            showStatus(
-                "Unable to check server status. " +
-                "Check your connection to IANSEO; retrying automatically."
-            );
+            if (!submitting) {
+                startButton.disabled = true;
+                showStatus("Server status unknown — retrying…");
+                help.title = "Check your connection to IANSEO.";
+            }
             console.warn("Timing server status check failed:", error);
         } finally {
             clearTimeout(timeout);
@@ -308,7 +407,6 @@ include('Common/Templates/head.php');
         }
     }
 
-    showStatus("Checking display server…");
     checkServer();
 })();
 </script>
