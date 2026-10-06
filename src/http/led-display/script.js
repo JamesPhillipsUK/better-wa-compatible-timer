@@ -8,7 +8,10 @@ const topLabelEl = document.getElementById("topLabel");
 const bottomLabelEl = document.getElementById("bottomLabel");
 const secondaryEl = document.getElementById("secondary");
 
-const MESSAGE_API_BASE = "http://localhost:5500";
+const MESSAGE_API_BASE = window.location.origin;
+
+const WA_SOCKET_URL = new URL("http://localhost:5001");
+WA_SOCKET_URL.hostname = window.location.hostname;
 
 let lastTimeMessageAt = 0;
 let messageState = { pending: "", active: "" };
@@ -639,7 +642,7 @@ setDisconnectedState(true);
 pollDisplaySettings();
 
 if (typeof io !== "undefined") {
-  const socket = io("http://localhost:5001", {
+  const socket = io(WA_SOCKET_URL.origin, {
     transports: ["websocket"],
     reconnection: true,
     reconnectionAttempts: Infinity,

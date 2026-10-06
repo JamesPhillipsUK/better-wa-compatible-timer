@@ -29,8 +29,35 @@ Version: 1.0.0
     <div id="flag" class="flag">TIMER READY</div>
   </div>
   <div id="offlineMessage" class="offline-message">TIMER OFFLINE</div>
-  <script src="http://localhost:5001/socket.io/socket.io.js"></script>
-  <script src="./script.js"></script>
+  <script>
+    (function () {
+      const socketLibraryUrl = new URL(
+        "http://localhost:5001/socket.io/socket.io.js"
+      );
+      socketLibraryUrl.hostname = window.location.hostname;
+
+      function loadDisplayScript() {
+        const displayScript = document.createElement("script");
+        displayScript.src = "./script.js";
+        document.body.appendChild(displayScript);
+      }
+
+      const socketLibrary = document.createElement("script");
+      socketLibrary.src = socketLibraryUrl.href;
+
+      socketLibrary.onload = loadDisplayScript;
+
+      socketLibrary.onerror = function () {
+        console.error(
+          "Could not load the WA socket library:",
+          socketLibraryUrl.href
+        );
+        loadDisplayScript();
+      };
+
+      document.body.appendChild(socketLibrary);
+    })();
+  </script>
 </body>
 
 </html>
