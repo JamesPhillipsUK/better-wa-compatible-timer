@@ -51,6 +51,10 @@ include('Common/Templates/head.php');
             height: 1900px;
         }
     }
+
+    #timing-control-frame[hidden] {
+        display: none;
+    }
 </style>
 
 <div id="timing-control-module">
@@ -74,7 +78,8 @@ include('Common/Templates/head.php');
 
     <iframe
         id="timing-control-frame"
-        title="Timing display controls">
+        title="Timing display controls"
+        hidden>
     </iframe>
 
     <noscript>
@@ -91,18 +96,99 @@ include('Common/Templates/head.php');
     const hubUrl = new URL("http://localhost:5500/control-hub.html");
     hubUrl.hostname = window.location.hostname;
 
-    link.href = hubUrl.href;
-    link.hidden = false;
+    const statusUrl = new URL("status.php", window.location.href);
+    const usesHttps = window.location.protocol === "https:";
+    let frameLoaded = false;
 
-    if (window.location.protocol === "https:") {
-        frame.hidden = true;
-        help.textContent =
-            "This IANSEO page uses HTTPS. Use the separate-tab link " +
-            "to open the HTTP timing controls.";
-        return;
+    link.href = hubUrl.href;
+    link.hidden = true;
+
+    help.setAttribute("role", "status");
+    help.setAttribute("aria-live", "polite");
+
+    function showStatus(message) {
+        if (help.textContent !== message) {
+            help.textContent = message;
+        }
     }
 
-    frame.src = hubUrl.href;
+    function unloadControls() {
+        frame.hidden = true;
+        link.hidden = true;
+
+        if (frameLoaded) {
+            frame.src = "about:blank";
+            frameLoaded = false;
+        }
+    }
+
+    async function checkServer() {
+        const controller = new AbortController();
+        const timeout = setTimeout(function () {
+            controller.abort();
+        }, 5000);
+
+        try {
+            const response = await fetch(statusUrl, {
+                cache: "no-store",
+                signal: controller.signal
+            });
+
+            if (!response.ok) {
+                throw new Error("Status request failed.");
+            }
+
+            const status = await response.json();
+
+            if (typeof status.displayServerReachable !== "boolean") {
+                throw new Error("Invalid status response.");
+            }
+
+            if (!status.displayServerReachable) {
+                unloadControls();
+                showStatus(
+                    "Display server is not responding. Start it using " +
+                    "the usual launcher; this page will reconnect automatically."
+                );
+                return;
+            }
+
+            link.hidden = false;
+
+            if (usesHttps) {
+                showStatus(
+                    "Display server is responding. Use the separate-tab " +
+                    "link to open its HTTP controls from this HTTPS page."
+                );
+                return;
+            }
+
+            showStatus(
+                "Display server is responding. " +
+                "This does not confirm that WA timing data is arriving."
+            );
+
+            if (!frameLoaded) {
+                frame.src = hubUrl.href;
+                frameLoaded = true;
+            }
+
+            frame.hidden = false;
+
+        } catch (error) {
+            showStatus(
+                "Unable to check server status. " +
+                "Check your connection to IANSEO; retrying automatically."
+            );
+            console.warn("Timing server status check failed:", error);
+        } finally {
+            clearTimeout(timeout);
+            setTimeout(checkServer, 3000);
+        }
+    }
+
+    showStatus("Checking display server…");
+    checkServer();
 })();
 </script>
 
