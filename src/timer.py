@@ -14,6 +14,7 @@ import socketserver
 from typing import Tuple
 from http import HTTPStatus
 from stateManager import StateFile
+from displaySettings import read_settings, save_settings
 
 
 def getSetup(setupFile: str) -> dict:
@@ -103,6 +104,50 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
             Some sections of Philip's API implementation POST, others
             prefer to GET.  Thanks, Philip - I hate this.
         """
+        if self.path == "/api/display-settings":
+            try:
+                content_length = int(self.headers.get("Content-Length", "0"))
+
+                if not 0 < content_length <= 1024:
+                    raise ValueError("Invalid settings request size.")
+
+                data = json.loads(
+                    self.rfile.read(content_length).decode("utf-8")
+                )
+
+                if not isinstance(data, dict):
+                    raise ValueError("Settings must be a JSON object.")
+
+                style = data.get("twoDetailStyle")
+
+                if style not in ("ABCD", "ABCDEF"):
+                    raise ValueError("twoDetailStyle must be ABCD or ABCDEF.")
+
+            except (ValueError, UnicodeDecodeError):
+                self.send_error(
+                    HTTPStatus.BAD_REQUEST,
+                    "Expected twoDetailStyle to be ABCD or ABCDEF."
+                )
+                return
+
+            try:
+                settings = save_settings(style)
+                response = json.dumps(settings).encode("utf-8")
+            except (OSError, ValueError):
+                self.handleInternalServerError()
+                return
+
+            self.send_response(HTTPStatus.OK)
+            self.send_header(
+                "Content-Type",
+                "application/json; charset=utf-8"
+            )
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(response)))
+            self.end_headers()
+            self.wfile.write(response)
+            return
+        
         if self.path.startswith("/api/message-state/"):
             if self.path.endswith("/pending"):
                 self.send_response(HTTPStatus.OK)
@@ -141,6 +186,26 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
         """ Handles all GET requests.
         """
         self.path = self.path.split('?')[0]
+
+        if self.path == "/api/display-settings":
+            try:
+                settings = read_settings()
+                response = json.dumps(settings).encode("utf-8")
+            except (OSError, ValueError):
+                self.handleInternalServerError()
+                return
+
+            self.send_response(HTTPStatus.OK)
+            self.send_header(
+                "Content-Type",
+                "application/json; charset=utf-8"
+            )
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(response)))
+            self.end_headers()
+            self.wfile.write(response)
+            return
+
         if self.path == "/api/message-state":
             self.send_response(HTTPStatus.OK)
             self.generateAPIResponseHeaders("/message-state")

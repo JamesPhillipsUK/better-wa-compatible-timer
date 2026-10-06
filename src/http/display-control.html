@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Timing Display Controls</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f3f5;
+      color: #222;
+      margin: 0;
+      padding: 24px;
+    }
+
+    main {
+      max-width: 520px;
+      margin: 24px auto;
+      padding: 24px;
+      background: white;
+      border-radius: 12px;
+    }
+
+    h1 { margin-top: 0; }
+    p { line-height: 1.5; }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    select, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      background: #440046;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    #status { min-height: 3em; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Timing Display Controls</h1>
+
+    <form id="settingsForm">
+      <label for="twoDetailStyle">Two-detail display</label>
+
+      <select id="twoDetailStyle" disabled>
+        <option value="ABCD">AB / CD — two archers per detail</option>
+        <option value="ABCDEF">ABC / DEF — three archers per detail</option>
+      </select>
+
+      <button id="saveButton" type="submit" disabled>
+        Save setting
+      </button>
+    </form>
+
+    <p id="status" role="status" aria-live="polite">
+      Loading saved setting…
+    </p>
+
+</main>
+
+  <script>
+    const form = document.getElementById("settingsForm");
+    const selector = document.getElementById("twoDetailStyle");
+    const saveButton = document.getElementById("saveButton");
+    const status = document.getElementById("status");
+
+    function describeStyle(style) {
+      return style === "ABCDEF" ? "ABC / DEF" : "AB / CD";
+    }
+
+    async function requestSettings(options = {}) {
+      const response = await fetch("/api/display-settings", {
+        ...options,
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error("Server returned " + response.status);
+      }
+
+      const settings = await response.json();
+
+      if (!["ABCD", "ABCDEF"].includes(settings.twoDetailStyle)) {
+        throw new Error("Server returned an invalid setting.");
+      }
+
+      return settings;
+    }
+
+    async function loadSettings() {
+      try {
+        const settings = await requestSettings();
+        selector.value = settings.twoDetailStyle;
+        selector.disabled = false;
+        saveButton.disabled = false;
+        status.textContent =
+          "Saved setting: " + describeStyle(settings.twoDetailStyle);
+      } catch (error) {
+        status.textContent =
+          "Could not load settings. Check the server is running, then refresh this page.";
+        console.error(error);
+      }
+    }
+
+    selector.addEventListener("change", function () {
+      status.textContent = "Selection changed. Press Save setting to apply.";
+    });
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      selector.disabled = true;
+      saveButton.disabled = true;
+      status.textContent = "Saving…";
+
+      try {
+        const settings = await requestSettings({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            twoDetailStyle: selector.value
+          })
+        });
+
+        selector.value = settings.twoDetailStyle;
+        status.textContent =
+          "Saved: " + describeStyle(settings.twoDetailStyle)
+      } catch (error) {
+        status.textContent =
+          "Could not confirm save. Check connection and refresh to see the saved setting.";
+        console.error(error);
+      } finally {
+        selector.disabled = false;
+        saveButton.disabled = false;
+      }
+    });
+
+    loadSettings();
+  </script>
+</body>
+</html>

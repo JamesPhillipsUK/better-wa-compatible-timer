@@ -1,7 +1,7 @@
 /** JavaScript for led-display.html.
  *  @author: Philip Taylor
  *  @editor: Jesse Phillips
- *  @version: 1.1.0
+ *  @version: 1.2.0
  **/
 const timerEl = document.getElementById("timer");
 const topLabelEl = document.getElementById("topLabel");
@@ -25,6 +25,42 @@ const DETAIL_LABELS = {
   12: { upper: "CD", lower: "cd" },
   13: { upper: "EF", lower: "ef" },
 };
+
+let twoDetailStyle = "ABCD";
+
+async function pollDisplaySettings() {
+  try {
+    const response = await fetch("/api/display-settings", {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error("Settings request failed: " + response.status);
+    }
+
+    const settings = await response.json();
+    const style = settings.twoDetailStyle;
+
+    if (style !== "ABCD" && style !== "ABCDEF") {
+      throw new Error("Unknown two-detail style.");
+    }
+
+    twoDetailStyle = style;
+
+    DETAIL_LABELS[5] = style === "ABCDEF"
+      ? { upper: "ABC", lower: "abc" }
+      : { upper: "AB", lower: "ab" };
+
+    DETAIL_LABELS[6] = style === "ABCDEF"
+      ? { upper: "DEF", lower: "def" }
+      : { upper: "CD", lower: "cd" };
+
+  } catch (error) {
+    console.warn("Could not refresh display settings:", error);
+  } finally {
+    setTimeout(pollDisplaySettings, 1000);
+  }
+}
 
 const TWO_DETAIL_CYCLE = [5, 6];
 const THREE_DETAIL_CYCLE = [11, 12, 13];
@@ -399,8 +435,12 @@ function showNextPhase(whoShoots) {
   topLabelEl.style.display = "block";
   timerEl.classList.add("detail-display");
 
-  // The full Danage-style order is wider than the old two-letter display.
-  timerEl.style.fontSize = shootingOrderState.detailCount === 3
+  // The display is significantly wider now and must allow for up to 7 characters.
+  const needsSmallerText =
+    shootingOrderState.detailCount === 3 ||
+    (shootingOrderState.detailCount === 2 && twoDetailStyle === "ABCDEF");
+
+  timerEl.style.fontSize = needsSmallerText
     ? "min(18vw, 46vh)"
     : "min(24vw, 50vh)";
 
@@ -595,6 +635,8 @@ document.addEventListener("keydown", function (event) {
 });
 
 setDisconnectedState(true);
+
+pollDisplaySettings();
 
 if (typeof io !== "undefined") {
   const socket = io("http://localhost:5001", {
