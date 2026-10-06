@@ -2,6 +2,99 @@
 require_once(dirname(__DIR__, 3) . '/config.php');
 require_once('Common/Fun_FormatText.inc.php');
 
+// Keep a session token for startup requests.
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+if (empty($_SESSION['timing_start_token'])) {
+    $_SESSION['timing_start_token'] = bin2hex(random_bytes(32));
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $token = $_POST['timing_start_token'] ?? '';
+
+    if (!is_string($token) ||
+        !hash_equals($_SESSION['timing_start_token'], $token)) {
+        http_response_code(403);
+        exit('Invalid startup request. Refresh the control page and try again.');
+    }
+
+    // Check whether the display server already responds.
+    $context = stream_context_create(array(
+        'http' => array(
+            'timeout' => 2,
+            'follow_location' => 0,
+            'header' => "Accept: application/json\r\nConnection: close\r\n"
+        )
+    ));
+
+    $response = @file_get_contents(
+        'http://127.0.0.1:5500/api/display-settings',
+        false,
+        $context,
+        0,
+        4096
+    );
+
+    $settings = $response !== false
+        ? json_decode($response, true)
+        : null;
+
+    $alreadyRunning =
+        is_array($settings) &&
+        isset($settings['twoDetailStyle']) &&
+        in_array(
+            $settings['twoDetailStyle'],
+            array('ABCD', 'ABCDEF'),
+            true
+        );
+
+    if ($alreadyRunning) {
+        $resultMessage =
+            'The display server is already responding. No startup requested.';
+    } elseif (!function_exists('exec')) {
+        $resultMessage =
+            'Startup is unavailable: PHP command execution is disabled.';
+    } else {
+        $windowsDirectory = getenv('SystemRoot') ?: 'C:\\Windows';
+        $taskCommand = $windowsDirectory . '\\System32\\schtasks.exe';
+
+        if (!is_file($taskCommand)) {
+            $resultMessage = 'Could not locate Windows Task Scheduler command.';
+        } else {
+            // The task name is fixed to a windows service (I know, yuck)
+            $command = escapeshellarg($taskCommand)
+                . ' /Run /TN "NEUAL-Timing-Start" 2>&1';
+
+            $output = array();
+            $exitCode = 1;
+
+            exec($command, $output, $exitCode);
+
+            if ($exitCode === 0) {
+                $resultMessage =
+                    'Startup requested. The controls will appear when the '
+                    . 'display server responds. If it remains offline, check '
+                    . 'Task Scheduler and that its Windows user is logged in.';
+            } else {
+                $resultMessage =
+                    'Windows could not start the task: '
+                    . implode(' ', $output);
+            }
+        }
+    }
+
+    $_SESSION['timing_start_result'] = $resultMessage;
+
+    // Redirect so refreshing the page doesn't repeat the startup request.
+    header('Location: index.php', true, 303);
+    exit;
+}
+
+$startupMessage = $_SESSION['timing_start_result'] ?? '';
+unset($_SESSION['timing_start_result']);
+
 $PAGE_TITLE = 'Timing Control Hub';
 
 include('Common/Templates/head.php');
@@ -63,6 +156,34 @@ include('Common/Templates/head.php');
     </div>
 
     <div class="timing-help">
+        <form method="post" action="index.php">
+            <input
+                type="hidden"
+                name="timing_start_token"
+                value="<?php echo htmlspecialchars(
+                    $_SESSION['timing_start_token'],
+                    ENT_QUOTES,
+                    'UTF-8'
+                ); ?>">
+
+            <button
+                type="submit"
+                style="background:#440046; color:white; border:0;
+                       border-radius:6px; padding:12px 18px;
+                       font-size:16px; cursor:pointer;">
+                Start Everything
+            </button>
+        </form>
+
+        <?php if ($startupMessage !== ''): ?>
+            <p role="status">
+                <?php echo htmlspecialchars(
+                    $startupMessage,
+                    ENT_QUOTES,
+                    'UTF-8'
+                ); ?>
+            </p>
+        <?php endif; ?>
         <p>
             <a id="timing-control-link"
                target="_blank"
