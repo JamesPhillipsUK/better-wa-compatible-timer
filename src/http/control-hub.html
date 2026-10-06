@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Timing Display Control Hub</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #eef0f4;
+      color: #20202a;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      background: #440046;
+      color: white;
+      padding: 24px;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    main {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    section {
+      min-width: 0;
+      background: white;
+      border: 1px solid #d9dce3;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .section-heading {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid #d9dce3;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 21px;
+    }
+
+    a {
+      color: #45216b;
+    }
+
+    a:focus-visible {
+      outline: 3px solid #c283ff;
+      outline-offset: 4px;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 850px;
+      border: 0;
+      background: white;
+    }
+
+    .detail-frame {
+      height: 700px;
+    }
+
+    .note {
+      line-height: 1.5;
+      color: #505461;
+    }
+
+    @media (max-width: 950px) {
+      .controls {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      main {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Timing Control Hub</h1>
+    <p>Messages and detail settings for the timing display.</p>
+  </header>
+
+  <main>
+    <div class="controls">
+      <section aria-labelledby="messages-heading">
+        <div class="section-heading">
+          <h2 id="messages-heading">Message centre</h2>
+          <a href="/message-controller/messages.html"
+             target="_blank" rel="noopener">
+            Open separately ↗
+          </a>
+        </div>
+
+        <iframe
+          src="/message-controller/messages.html"
+          title="Message centre">
+        </iframe>
+      </section>
+
+      <section aria-labelledby="details-heading">
+        <div class="section-heading">
+          <h2 id="details-heading">Detail display</h2>
+          <a href="/display-control.html"
+             target="_blank" rel="noopener">
+            Open separately ↗
+          </a>
+        </div>
+
+        <iframe
+          class="detail-frame"
+          src="/display-control.html"
+          title="Detail display settings">
+        </iframe>
+      </section>
+    </div>
+
+    <p class="note">
+      Message controls follow the normal timing cycle.
+      Saved detail settings apply automatically to connected displays.
+    </p>
+  </main>
+</body>
+</html>
