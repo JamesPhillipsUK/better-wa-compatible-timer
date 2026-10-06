@@ -267,6 +267,9 @@ def runServer() -> None:
     """ Runs the internal server for the LED Displays and messaging API.
     """
     setup = getSetup(f"src{os.sep}LEDSetup.json")
-    server = socketserver.TCPServer((setup["hostname"], setup["port"]),
-                                    HTTPServerHandler)
+    bind_address = setup.get("bind_address", setup["hostname"])
+    server = socketserver.TCPServer(
+        (bind_address, setup["port"]),
+        HTTPServerHandler
+    )
     server.serve_forever()
