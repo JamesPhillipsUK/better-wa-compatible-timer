@@ -11,6 +11,7 @@ import base64
 import urllib
 import http.server
 import socketserver
+import threading
 from typing import Tuple
 from http import HTTPStatus
 from stateManager import StateFile
@@ -31,6 +32,8 @@ def getSetup(setupFile: str) -> dict:
 
 class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
     state = StateFile()
+    message_lock = threading.Lock()
+    settings_lock = threading.Lock()
 
     def __init__(self,
                  request: bytes,
@@ -74,21 +77,23 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
                                  "application/json; charset=utf-8")
 
     def generateAPIResponse(self, name: str, data: str = None) -> bytes:
-        """ Generates an API response.
-        """
-        match name:
-            case "/message-state":
-                return self.state.readState()
-            case "/pending":
-                return self.state.handlePending(data)
-            case "/clear-pending":
-                return self.state.clearPending()
-            case "/consume":
-                return self.state.consume()
-            case "/clear-active":
-                return self.state.clearActive()
-            case "/get-image-list":
-                return self.state.getImageList()
+        """Generate an API response."""
+
+        if name == "/get-image-list":
+            return self.state.getImageList()
+
+        with self.message_lock:
+            match name:
+                case "/message-state":
+                    return self.state.readState()
+                case "/pending":
+                    return self.state.handlePending(data)
+                case "/clear-pending":
+                    return self.state.clearPending()
+                case "/consume":
+                    return self.state.consume()
+                case "/clear-active":
+                    return self.state.clearActive()
 
     def handleInternalServerError(self) -> None:
         """ Handles server-side errors.
@@ -131,7 +136,8 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             try:
-                settings = save_settings(style)
+                with self.settings_lock:
+                    settings = save_settings(style)
                 response = json.dumps(settings).encode("utf-8")
             except (OSError, ValueError):
                 self.handleInternalServerError()
@@ -189,7 +195,8 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
 
         if self.path == "/api/display-settings":
             try:
-                settings = read_settings()
+                with self.settings_lock:
+                    settings = read_settings()
                 response = json.dumps(settings).encode("utf-8")
             except (OSError, ValueError):
                 self.handleInternalServerError()
@@ -262,13 +269,43 @@ class HTTPServerHandler(http.server.SimpleHTTPRequestHandler):
             self.handleInternalServerError()
             return
 
+class DisplayHTTPServer(socketserver.ThreadingTCPServer):
+    """Serve displays independently, with a limit on open connections."""
+
+    daemon_threads = True
+    request_queue_size = 32
+
+    def __init__(self, server_address, handler):
+        self._connection_slots = threading.BoundedSemaphore(32)
+        super().__init__(server_address, handler)
+
+    def get_request(self):
+        request, address = super().get_request()
+        request.settimeout(5)
+        return request, address
+
+    def process_request(self, request, client_address):
+        if not self._connection_slots.acquire(blocking=False):
+            self.shutdown_request(request)
+            return
+        try:
+            super().process_request(request, client_address)
+        except BaseException:
+            self._connection_slots.release()
+            raise
+
+    def process_request_thread(self, request, client_address):
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            self._connection_slots.release()
 
 def runServer() -> None:
     """ Runs the internal server for the LED Displays and messaging API.
     """
     setup = getSetup(f"src{os.sep}LEDSetup.json")
     bind_address = setup.get("bind_address", setup["hostname"])
-    server = socketserver.TCPServer(
+    server = DisplayHTTPServer(
         (bind_address, setup["port"]),
         HTTPServerHandler
     )
