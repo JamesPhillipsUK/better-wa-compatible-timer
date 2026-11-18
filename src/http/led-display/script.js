@@ -141,40 +141,40 @@ function setMessageState(state) {
   messageState.active = normalizeMessage((state && state.active) || "");
 }
 
-function fetchMessageState() {
-  return fetch(MESSAGE_API_BASE + "/api/message-state", {
-    method: "GET",
-    headers: { "Accept": "application/json" }
-  })
-    .then(r => r.json())
-    .then(state => {
-      setMessageState(state);
-      return messageState;
+async function requestMessageState(path, method) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
+
+  try {
+    const response = await fetch(MESSAGE_API_BASE + path, {
+      method: method,
+      headers: { "Accept": "application/json" },
+      cache: "no-store",
+      signal: controller.signal
     });
+
+    if (!response.ok) {
+      throw new Error("Message request failed: " + response.status);
+    }
+
+    const state = await response.json();
+    setMessageState(state);
+    return messageState;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function fetchMessageState() {
+  return requestMessageState("/api/message-state", "GET");
 }
 
 function consumePendingMessage() {
-  return fetch(MESSAGE_API_BASE + "/api/message-state/consume", {
-    method: "POST",
-    headers: { "Accept": "application/json" }
-  })
-    .then(r => r.json())
-    .then(state => {
-      setMessageState(state);
-      return messageState;
-    });
+  return requestMessageState("/api/message-state/consume", "POST");
 }
 
 function clearActiveMessage() {
-  return fetch(MESSAGE_API_BASE + "/api/message-state/clear-active", {
-    method: "POST",
-    headers: { "Accept": "application/json" }
-  })
-    .then(r => r.json())
-    .then(state => {
-      setMessageState(state);
-      return messageState;
-    });
+  return requestMessageState("/api/message-state/clear-active", "POST");
 }
 
 function tryConsumePendingMessageIfNeeded(whoShoots) {
@@ -652,17 +652,21 @@ if (typeof io !== "undefined") {
     autoConnect: true
   });
 
-  fetchMessageState().catch(function () { });
+    async function pollMessageState() {
+    try {
+      await fetchMessageState();
 
-  setInterval(function () {
-    fetchMessageState()
-      .then(function () {
-        if (wasInExpiryState && !messageState.active && messageState.pending) {
-          tryConsumePendingMessageIfNeeded();
-        }
-      })
-      .catch(function () { });
-  }, 1000);
+      if (wasInExpiryState && !messageState.active && messageState.pending) {
+        tryConsumePendingMessageIfNeeded();
+      }
+    } catch {
+      // Keep the last known state and try again on the next poll.
+    } finally {
+      setTimeout(pollMessageState, 1000);
+    }
+  }
+
+  pollMessageState();
 
   socket.on("connect", function () {
   });
@@ -727,8 +731,6 @@ if (typeof io !== "undefined") {
     } else if (isExpiryState) {
       if (messageState.active) {
         showActiveMessage(messageState.active);
-      } else if (isConsumingMessage) {
-        // Wait for message check to finish before showing next transition.
       } else {
         showNextPhase(whoShoots);
       }
